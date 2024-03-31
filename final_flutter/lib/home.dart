@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+
+// Screens
 import 'screens/dashboard_screen.dart';
 import 'screens/community_screen.dart';
 import 'screens/folder_sceen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/add_folder_screen.dart';
+// Widget
 import 'widgets/bottom_nav_button.dart';
 import 'widgets/bottom_sheet.dart';
 
@@ -49,7 +53,10 @@ class _HomeState extends State<Home> {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return const BottomSheetWidget(); // Sử dụng bottom_sheet.dart
+        return const BottomSheetWidget(
+          height: 200,
+          buttons: [Text('Học Phần'), Text('Thư mục')],
+        );
       },
     );
   }
@@ -61,6 +68,7 @@ class _HomeState extends State<Home> {
 
     return Scaffold(
       body: currentScreen,
+      backgroundColor: const Color(0xFFBBEDF2),
       floatingActionButton: FloatingActionButton(
         elevation: 0,
         backgroundColor: Colors.blue,
@@ -72,6 +80,7 @@ class _HomeState extends State<Home> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomAppBar(
+        color: Colors.white,
         shape: const CircularNotchedRectangle(),
         notchMargin: 10,
         child: SizedBox(

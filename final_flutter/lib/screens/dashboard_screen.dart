@@ -12,8 +12,11 @@ class _DashBoardState extends State<DashBoard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('DashBoard')),
-      body: const Center(
-        child: Text('DashBoard Screen', style: TextStyle(fontSize: 40)),
+      body: Container(
+        color: const Color(0xFFBBEDF2),
+        child: const Center(
+          child: Text('DashBoard Screen', style: TextStyle(fontSize: 40)),
+        ),
       ),
     );
   }
