@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
-import 'page/dashboard.dart';
-import 'page/profile.dart';
+import 'screens/dashboard_screen.dart';
+import 'screens/community_screen.dart';
+import 'screens/folder_sceen.dart';
+import 'screens/profile_screen.dart';
+import 'widgets/bottom_nav_button.dart';
+import 'widgets/bottom_sheet.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -11,26 +15,59 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int currentTab = 0;
-  final List<Widget> screens = [
-    const DashBoard(),
-    const Profile(),
-  ];
-
-  final PageStorageBucket bucket = PageStorageBucket();
-  Widget currentScreen = const DashBoard();
+  late final List<Widget> screens;
 
   @override
+  void initState() {
+    super.initState();
+    screens = [
+      const DashBoard(),
+      const Community(),
+      const Folder(),
+      const Profile(),
+    ];
+  }
+
+  Widget buildBottomNavigationButton(
+      int tabIndex, String iconPath, String label) {
+    return BottomNavigationButton(
+      // Sử dụng bottom_nav_button.dart
+      tabIndex: tabIndex,
+      iconPath: iconPath,
+      label: label,
+      isSelected: currentTab == tabIndex,
+      onPressed: (int index) {
+        setState(() {
+          currentScreen = screens[index];
+          currentTab = index;
+        });
+      },
+    );
+  }
+
+  void _showBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return const BottomSheetWidget(); // Sử dụng bottom_sheet.dart
+      },
+    );
+  }
+
+  late Widget currentScreen;
+  @override
   Widget build(BuildContext context) {
+    currentScreen = screens[currentTab];
+
     return Scaffold(
-      body: PageStorage(
-        bucket: bucket,
-        child: currentScreen,
-      ),
+      body: currentScreen,
       floatingActionButton: FloatingActionButton(
         elevation: 0,
         backgroundColor: Colors.blue,
         shape: const CircleBorder(),
-        onPressed: () {},
+        onPressed: () {
+          _showBottomSheet(context);
+        },
         child: const Icon(Icons.add),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -45,107 +82,15 @@ class _HomeState extends State<Home> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  MaterialButton(
-                    minWidth: 40,
-                    onPressed: () {
-                      setState(() {
-                        currentScreen = const DashBoard();
-                        currentTab = 0;
-                      });
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.dashboard,
-                          color: currentTab == 0 ? Colors.blue : Colors.grey,
-                        ),
-                        Text(
-                          'Home',
-                          style: TextStyle(
-                              color:
-                                  currentTab == 0 ? Colors.blue : Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
-                  MaterialButton(
-                    minWidth: 40,
-                    onPressed: () {
-                      setState(() {
-                        currentScreen = const DashBoard();
-                        currentTab = 1;
-                      });
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.dashboard,
-                          color: currentTab == 1 ? Colors.blue : Colors.grey,
-                        ),
-                        Text(
-                          'CD',
-                          style: TextStyle(
-                              color:
-                                  currentTab == 1 ? Colors.blue : Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
+                  buildBottomNavigationButton(0, 'home', 'Home'),
+                  buildBottomNavigationButton(1, 'people', 'Community'),
                 ],
               ),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  MaterialButton(
-                    minWidth: 40,
-                    onPressed: () {
-                      setState(() {
-                        currentScreen = const DashBoard();
-                        currentTab = 0;
-                      });
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.dashboard,
-                          color: currentTab == 2 ? Colors.blue : Colors.grey,
-                        ),
-                        Text(
-                          'File',
-                          style: TextStyle(
-                              color:
-                                  currentTab == 2 ? Colors.blue : Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
-                  MaterialButton(
-                    minWidth: 40,
-                    onPressed: () {
-                      setState(() {
-                        currentScreen = const Profile();
-                        currentTab = 1;
-                      });
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.chat,
-                          color: currentTab == 3 ? Colors.blue : Colors.grey,
-                        ),
-                        Text(
-                          'Profile',
-                          style: TextStyle(
-                              color:
-                                  currentTab == 3 ? Colors.blue : Colors.grey),
-                        )
-                      ],
-                    ),
-                  ),
+                  buildBottomNavigationButton(2, 'folder', 'Folder'),
+                  buildBottomNavigationButton(3, 'profile', 'Profile'),
                 ],
               ),
             ],
