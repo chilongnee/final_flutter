@@ -1,3 +1,4 @@
+import 'package:final_flutter/login/firebase_auth_service.dart';
 import 'package:flutter/material.dart';
 
 // Screens
@@ -20,10 +21,11 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int currentTab = 0;
   late final List<Widget> screens;
-
+  FirebaseAuthService _auth = new FirebaseAuthService();
   @override
   void initState() {
     super.initState();
+    print(_auth.currentUser?.email);
     screens = [
       const DashBoard(),
       const Community(),
