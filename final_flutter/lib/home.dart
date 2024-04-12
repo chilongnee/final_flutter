@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 
-// Screens
-import 'screens/dashboard_screen.dart';
-import 'screens/community_screen.dart';
-import 'screens/folder_sceen.dart';
-import 'screens/profile_screen.dart';
-import 'screens/add_folder_screen.dart';
-// Widget
+// SCREEN
+import 'screens/dashboard/dashboard_screen.dart';
+import 'screens/community/community_screen.dart';
+import 'screens/folder/folder_sceen.dart';
+import 'screens/profile/profile_screen.dart';
+import 'screens/folder/add_folder_screen.dart';
+// WIDGET
 import 'widgets/bottom_nav_button.dart';
 import 'widgets/bottom_sheet.dart';
+// FIREBASE
+import 'package:final_flutter/screens/login/firebase_auth_service.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -20,10 +22,11 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   int currentTab = 0;
   late final List<Widget> screens;
-
+  final FirebaseAuthService _auth = FirebaseAuthService();
   @override
   void initState() {
     super.initState();
+    print(_auth.currentUser?.email);
     screens = [
       const DashBoard(),
       const Community(),
@@ -53,13 +56,35 @@ class _HomeState extends State<Home> {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
-        return const BottomSheetWidget(
+        return BottomSheetWidget(
           height: 200,
-          buttons: [Text('Học Phần'), Text('Thư mục')],
+          buttons: const [
+            Text('Học Phần'),
+            Text('Thư mục'),
+          ],
+          onPressed: (int index) {
+            if (index == 1) {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) =>
+                        const AddFolderScreen()), // Chuyển hướng sang trang AddFolderScreen
+              );
+            }
+          },
         );
       },
     );
   }
+
+  void _handleTabSelection(int index) {
+    setState(() {
+      currentScreen = screens[index];
+      currentTab = index;
+    });
+  }
+  
 
   late Widget currentScreen;
   @override

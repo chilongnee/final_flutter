@@ -18,16 +18,17 @@ class BottomNavigationButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return MaterialButton(
-      minWidth: 40,
+      minWidth: screenWidth / 6,
       onPressed: () => onPressed(tabIndex),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             child: SizedBox(
-              width: 30,
-              height: 30,
+              width: 25,
+              height: 25,
               child: Image.asset(isSelected
                   ? 'lib/icons/${iconPath}_black.png'
                   : 'lib/icons/${iconPath}_white.png'),
@@ -36,6 +37,7 @@ class BottomNavigationButton extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
+              fontSize: 10,
               fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
             ),
           )
