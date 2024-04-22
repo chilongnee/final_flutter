@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 // SCREEN
 import 'screens/dashboard/dashboard_screen.dart';
 import 'screens/community/community_screen.dart';
-import 'screens/folder/folder_sceen.dart';
+import 'screens/folder_course/folder_course_sceen.dart';
 import 'screens/profile/profile_screen.dart';
-import 'screens/folder/add_folder_screen.dart';
+import 'screens/folder_course/add_folder_screen.dart';
+import 'screens/folder_course/add_course_screen.dart';
 // WIDGET
 import 'widgets/bottom_nav_button.dart';
 import 'widgets/bottom_sheet.dart';
+import 'widgets/animation_bottom_top_page.dart';
 // FIREBASE
 import 'package:final_flutter/screens/login/firebase_auth_service.dart';
 
@@ -63,13 +65,19 @@ class _HomeState extends State<Home> {
             Text('Thư mục'),
           ],
           onPressed: (int index) {
-            if (index == 1) {
-              Navigator.pop(context);
+            Navigator.pop(context); // Đóng BottomSheet trước khi chuyển hướng
+
+            if (index == 0) {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                    builder: (context) =>
-                        const AddFolderScreen()), // Chuyển hướng sang trang AddFolderScreen
+                BottomToTopPageRoute(
+                    builder: (context) => const AddCourseScreen()),
+              );
+            } else if (index == 1) {
+              Navigator.push(
+                context,
+                BottomToTopPageRoute(
+                    builder: (context) => const AddFolderScreen()),
               );
             }
           },
@@ -84,7 +92,6 @@ class _HomeState extends State<Home> {
       currentTab = index;
     });
   }
-  
 
   late Widget currentScreen;
   @override
