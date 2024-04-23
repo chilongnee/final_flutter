@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'folder_detail.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class Folder extends StatefulWidget {
   const Folder({super.key});
@@ -77,6 +78,7 @@ class _FolderState extends State<Folder> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
+          print(snapshot);
           return const Center(child: Text('Error'));
         } else {
           final List<DocumentSnapshot> users = snapshot.data!.docs;
@@ -162,7 +164,111 @@ class _FolderState extends State<Folder> {
     );
   }
 
+  Future<User?> getCurrentUser() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      return user;
+    } else {
+      return null;
+    }
+  }
+
+  Future<List<DocumentSnapshot>> getUsersByUsername(String userID) async {
+    QuerySnapshot userSnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .where('userID', isEqualTo: userID)
+        .get();
+    return userSnapshot.docs;
+  }
+
   Widget _buildCourseTab(double screenWidth) {
-    return Container();
+    return FutureBuilder<User?>(
+      future: getCurrentUser(),
+      builder: (BuildContext context, AsyncSnapshot<User?> userSnapshot) {
+        final User? user = userSnapshot.data;
+        if (user != null) {
+          String currentUserID = user.uid ?? '';
+
+          return StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .where('userID', isEqualTo: currentUserID)
+                .snapshots(),
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return const Center(child: Text('Error'));
+              } else {
+                final List<DocumentSnapshot> users = snapshot.data!.docs;
+                if (users.isEmpty) {
+                  return const Center(child: Text('Không tìm thấy người dùng'));
+                } else {
+                  final userId = users[0].id;
+                  return StreamBuilder(
+                    stream: FirebaseFirestore.instance
+                        .collection('users')
+                        .doc(userId)
+                        .collection('courses')
+                        .snapshots(),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<QuerySnapshot> snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      } else if (snapshot.hasError) {
+                        return const Center(child: Text('Error'));
+                      } else {
+                        final List<DocumentSnapshot> courses =
+                            snapshot.data!.docs;
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: courses.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            final course = courses[index];
+                            return GestureDetector(
+                              onTap: () {
+                                print(courses[index].id);
+                              },
+                              child: Container(
+                                width: screenWidth,
+                                margin: const EdgeInsets.fromLTRB(
+                                    20.0, 10.0, 20.0, 10.0),
+                                padding: const EdgeInsets.all(12.0),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(10.0),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      course['title'],
+                                      style: const TextStyle(
+                                          fontSize: 18.0,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(
+                                      'Progress: ${course['progress']}',
+                                      style: const TextStyle(fontSize: 14.0),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      }
+                    },
+                  );
+                }
+              }
+            },
+          );
+        } else {
+          return Container();
+        }
+      },
+    );
   }
 }
