@@ -1,3 +1,4 @@
+import 'package:final_flutter/screens/login/forgot_password.dart';
 import 'package:flutter/material.dart';
 // SCREEN
 import 'package:final_flutter/home.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_social_button/flutter_social_button.dart';
 // FIREBASE
 import 'package:firebase_auth/firebase_auth.dart';
 import 'firebase_auth_service.dart';
+
 
 class Login extends StatefulWidget {
   const Login({super.key});
@@ -31,6 +33,7 @@ class _LoginState extends State<Login> {
     setState(() {
       _isSigning = true;
     });
+    _formKey.currentState!.validate();
     String email = _emailController.text;
     String password = _passwordController.text;
 
@@ -55,20 +58,31 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(187, 237, 242, 1),
+      backgroundColor: Colors.grey[200],
       body: Center(
         child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
               Container(
-                color: Colors.black,
                 width: 100,
                 height: 100,
                 margin: const EdgeInsets.only(
                   top: 50,
                   right: 250,
                 ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(50),
+                  color: Colors.grey[300],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(50),
+                  child: Image.asset(
+                    'assets/LHT2.png',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                // child: Image.asset('assets/LHT2.png'),
               ),
               Container(
                 margin: const EdgeInsets.only(
@@ -83,7 +97,7 @@ class _LoginState extends State<Login> {
                 ),
               ),
               Container(
-                margin: const EdgeInsets.only(right: 172, top: 50),
+                margin: const EdgeInsets.only(right: 172, top: 20),
                 child: const Text(
                   'Sign in to countinue',
                   style: TextStyle(
@@ -103,21 +117,17 @@ class _LoginState extends State<Login> {
                         keyboardType: TextInputType.emailAddress,
                         textInputAction: TextInputAction.next,
                         decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                            borderSide: const BorderSide(
-                              color: Colors.black,
-                              width: 1.0,
-                            ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:BorderSide(color: Colors.white)
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:BorderSide(color: Colors.deepPurple)
                           ),
                           hintText: 'Email',
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                            borderSide: const BorderSide(
-                              color: Colors.blue,
-                              width: 1.0,
-                            ),
-                          ),
+                          fillColor: Colors.white,
+                          filled: true
                         ),
                         validator: (String? value) {
                           final RegExp emailRegExp =
@@ -140,21 +150,17 @@ class _LoginState extends State<Login> {
                         obscureText:
                             _obscureText, // Use the _obscureText variable here
                         decoration: InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                            borderSide: const BorderSide(
-                              color: Colors.black,
-                              width: 1.0,
-                            ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:BorderSide(color: Colors.white)
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:BorderSide(color: Colors.deepPurple)
                           ),
                           hintText: 'Password',
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(15.0),
-                            borderSide: const BorderSide(
-                              color: Colors.blue,
-                              width: 1.0,
-                            ),
-                          ),
+                          fillColor: Colors.white,
+                          filled: true,
                           suffixIcon: Padding(
                             padding: const EdgeInsets.only(right: 10.0),
                             child: IconButton(
@@ -202,7 +208,13 @@ class _LoginState extends State<Login> {
                           ),
                           const SizedBox(width: 110),
                           GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) =>  ForgotPassword()),
+                              );
+                            },
                             child: const Text(
                               'Forgot password?',
                               style: TextStyle(

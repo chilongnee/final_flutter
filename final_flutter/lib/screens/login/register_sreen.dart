@@ -20,7 +20,7 @@ class SignUp extends StatefulWidget {
 
 class _SignUpState extends State<SignUp> {
   final FirebaseAuthService _auth = FirebaseAuthService();
-  Uint8List? _image;
+  
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -35,17 +35,15 @@ class _SignUpState extends State<SignUp> {
   final FocusNode _password = FocusNode();
   final FocusNode _cfpassword = FocusNode();
 
-  void selectImage() async {
-    Uint8List img = await pickImage(ImageSource.gallery);
-    setState(() {
-      _image = img;
-    });
-  }
+  
 
   void _signUp() async {
     setState(() {
       _isSigningUp = true;
     });
+
+    _formKey.currentState!.validate();
+
     String username = _usernameController.text;
     String email = _emailController.text;
     String password = _passwordController.text;
@@ -77,7 +75,7 @@ class _SignUpState extends State<SignUp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(187, 237, 242, 1),
+      backgroundColor:  Colors.grey[200],
       body: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -86,16 +84,16 @@ class _SignUpState extends State<SignUp> {
               Row(
                 children: [
                   Container(
-                    color: Colors.black,
                     width: 100,
                     height: 100,
                     margin: const EdgeInsets.only(top: 80, right: 30, left: 30),
+                    child: Image.asset('assets/LHT2.png'),
                   ),
                   const Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: EdgeInsets.only(top: 54.0),
+                        padding: EdgeInsets.only(top: 75.0),
                         child: Text(
                           'WELCOME',
                           style: TextStyle(
@@ -110,80 +108,39 @@ class _SignUpState extends State<SignUp> {
                   )
                 ],
               ),
-              Stack(
-                children: [
-                  _image != null
-                      ? Padding(
-                          padding: const EdgeInsets.only(top: 32.0),
-                          child: CircleAvatar(
-                            radius: 68,
-                            backgroundColor: Colors.teal,
-                            child: CircleAvatar(
-                              radius: 64,
-                              backgroundImage: MemoryImage(_image!),
-                              backgroundColor:
-                                  const Color.fromRGBO(187, 237, 242, 1),
-                            ),
-                          ),
-                        )
-                      : const Padding(
-                          padding: EdgeInsets.only(top: 32.0),
-                          child: CircleAvatar(
-                            radius: 68,
-                            backgroundColor: Colors.teal,
-                            child: CircleAvatar(
-                              radius: 64,
-                              backgroundImage: NetworkImage(
-                                  'https://static-00.iconduck.com/assets.00/avatar-default-dark-icon-512x512-3ixx3cy9.png'),
-                              backgroundColor: Color.fromRGBO(187, 237, 242, 1),
-                            ),
-                          ),
-                        ),
-                  Positioned(
-                      bottom: -10,
-                      left: 90,
-                      child: IconButton(
-                        onPressed: selectImage,
-                        icon: const Icon(Icons.add_a_photo),
-                        iconSize: 32,
-                      )),
-                ],
-              ),
+              
               Form(
                 key: _formKey,
                 child: Column(
                   children: [
                     Padding(
                       padding: const EdgeInsets.only(
-                          top: 24.0, left: 24.0, right: 24.0, bottom: 15.0),
+                          top: 50, right: 24, left: 24, bottom: 8.0),
                       child: SizedBox(
-                        height: 65,
+                        height: 80,
                         child: TextFormField(
-                          focusNode: _username,
                           controller: _usernameController,
-                          keyboardType: TextInputType.emailAddress,
+                          keyboardType: TextInputType.text,
                           textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                              borderSide: const BorderSide(
-                                color: Colors.black,
-                                width: 1.0,
-                              ),
-                            ),
-                            hintText: 'Username',
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                              borderSide: const BorderSide(
-                                color: Colors.blue,
-                                width: 1.0,
-                              ),
-                            ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:BorderSide(color: Colors.white)
                           ),
-                          validator: (String? value) {
-                            if (value == null) {
-                              _username.requestFocus();
-                              return "Username cannot be blank";
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:BorderSide(color: Colors.deepPurple)
+                          ),
+                          hintText: 'User Name',
+                          fillColor: Colors.white,
+                          filled: true
+                        ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your username';
+                            }
+                            if (value.length < 6) {
+                              return 'Username must be at least 6 characters';
                             }
                             return null;
                           },
@@ -191,32 +148,27 @@ class _SignUpState extends State<SignUp> {
                       ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.only(
-                          top: 0.0, left: 24.0, right: 24.0, bottom: 15.0),
+                      padding:
+                          const EdgeInsets.only(right: 24, left: 24, bottom: 8),
                       child: SizedBox(
-                        height: 65,
+                        height: 80,
                         child: TextFormField(
-                          focusNode: _email,
                           controller: _emailController,
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                              borderSide: const BorderSide(
-                                color: Colors.black,
-                                width: 1.0,
-                              ),
-                            ),
-                            hintText: 'Email',
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                              borderSide: const BorderSide(
-                                color: Colors.blue,
-                                width: 1.0,
-                              ),
-                            ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:BorderSide(color: Colors.white)
                           ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:BorderSide(color: Colors.deepPurple)
+                          ),
+                          hintText: 'Email',
+                          fillColor: Colors.white,
+                          filled: true
+                        ),
                           validator: (String? value) {
                             final RegExp emailRegExp =
                                 RegExp(r'^[^@]+@[^@]+\.[^@]+$');
@@ -227,53 +179,50 @@ class _SignUpState extends State<SignUp> {
                             return null;
                           },
                         ),
+                        
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(
-                          top: 0.0, left: 24.0, right: 24.0, bottom: 0.0),
+                          top: 0.0, left: 24.0, right: 24.0, bottom: 8.0),
                       child: SizedBox(
                         height: 80,
                         child: TextFormField(
                           focusNode: _password,
                           controller: _passwordController,
-                          textInputAction: TextInputAction.done,
+                          textInputAction: TextInputAction.next,
                           obscureText: _obscureText,
                           maxLength: 20,
                           decoration: InputDecoration(
                             counterText: '',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                              borderSide: const BorderSide(
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:BorderSide(color: Colors.white)
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:BorderSide(color: Colors.deepPurple)
+                          ),
+                          hintText: 'Password',
+                          fillColor: Colors.white,
+                          filled: true,
+                          suffixIcon: Padding(
+                            padding: const EdgeInsets.only(right: 10.0),
+                            child: IconButton(
+                              icon: Icon(
+                                _obscureText
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
                                 color: Colors.black,
-                                width: 1.0,
                               ),
-                            ),
-                            hintText: 'Password',
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                              borderSide: const BorderSide(
-                                color: Colors.blue,
-                                width: 1.0,
-                              ),
-                            ),
-                            suffixIcon: Padding(
-                              padding: const EdgeInsets.only(right: 10.0),
-                              child: IconButton(
-                                icon: Icon(
-                                  _obscureText
-                                      ? Icons.visibility
-                                      : Icons.visibility_off,
-                                  color: Colors.black,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscureText = !_obscureText;
-                                  });
-                                },
-                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscureText = !_obscureText;
+                                });
+                              },
                             ),
                           ),
+                        ),
                           validator: (String? value) {
                             if (value == null || value.length < 6) {
                               _password.requestFocus();
@@ -297,45 +246,44 @@ class _SignUpState extends State<SignUp> {
                           maxLength: 20,
                           decoration: InputDecoration(
                             counterText: '',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                              borderSide: const BorderSide(
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:BorderSide(color: Colors.white)
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide:BorderSide(color: Colors.deepPurple)
+                          ),
+                          hintText: 'Password',
+                          fillColor: Colors.white,
+                          filled: true,
+                          suffixIcon: Padding(
+                            padding: const EdgeInsets.only(right: 10.0),
+                            child: IconButton(
+                              icon: Icon(
+                                _obscureText
+                                    ? Icons.visibility
+                                    : Icons.visibility_off,
                                 color: Colors.black,
-                                width: 1.0,
                               ),
-                            ),
-                            hintText: 'Confirm Password',
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(15.0),
-                              borderSide: const BorderSide(
-                                color: Colors.blue,
-                                width: 1.0,
-                              ),
-                            ),
-                            suffixIcon: Padding(
-                              padding: const EdgeInsets.only(right: 10.0),
-                              child: IconButton(
-                                icon: Icon(
-                                  _obscureText2
-                                      ? Icons.visibility
-                                      : Icons.visibility_off,
-                                  color: Colors.black,
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    _obscureText2 = !_obscureText2;
-                                  });
-                                },
-                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscureText = !_obscureText;
+                                });
+                              },
                             ),
                           ),
-                          // validator: (String? value) {
-                          //   if (value == null || value.length < 6) {
-                          //     _cfpassword.requestFocus();
-                          //     return "Password should have at least 6 characters";
-                          //   }
-                          //   return null;
-                          // },
+                        ),
+                          validator: (String? value) {
+                            if (value == null || value.length < 6) {
+                              _cfpassword.requestFocus();
+                              return "Password should have at least 6 characters";
+                            } else if (value != _passwordController.text) {
+                              _cfpassword.requestFocus();
+                              return "Confirm password do not match";
+                            }
+                            return null;
+                          },
                         ),
                       ),
                     ),

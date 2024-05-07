@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'home.dart';
 
@@ -18,24 +19,37 @@ void main() async {
       projectId: "final-flutter-80ee0",
     ),
   );
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
-class DefaultFirebaseOptions {}
-
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: const Login(),
-      debugShowCheckedModeBanner: false,
+    return  
+       MaterialApp(
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+          visualDensity: VisualDensity.adaptivePlatformDensity,
+        ),
+        home: AuthWidget(), // Use AuthWidget instead of Login directly
+        debugShowCheckedModeBanner: false,
+      
     );
+  }
+}
+
+class AuthWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+  User? firebaseUser = FirebaseAuth.instance.currentUser;
+  Widget firstWidget;
+
+  if (firebaseUser != null) {
+    firstWidget = Home();
+  } else {
+    firstWidget = Login();
+  }
+    return firstWidget;
   }
 }
