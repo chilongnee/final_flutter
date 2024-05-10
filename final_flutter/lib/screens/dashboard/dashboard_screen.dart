@@ -11,7 +11,11 @@ class _DashBoardState extends State<DashBoard> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('DashBoard')),
+      appBar: AppBar(
+        title: const Text('DashBoard'),
+        automaticallyImplyLeading: false, 
+      ),
+      
       body: Container(
         color: const Color(0xFFBBEDF2),
         child: const Center(

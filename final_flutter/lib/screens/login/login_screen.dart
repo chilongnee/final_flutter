@@ -206,7 +206,7 @@ class _LoginState extends State<Login> {
                             "Remember Me",
                             style: TextStyle(color: Colors.black, fontSize: 14),
                           ),
-                          const SizedBox(width: 110),
+                          const SizedBox(width: 100),
                           GestureDetector(
                             onTap: () {
                               Navigator.push(

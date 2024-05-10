@@ -1,8 +1,11 @@
+import 'package:final_flutter/models/user.dart';
+import 'package:final_flutter/screens/login/user_repository.dart';
 import 'package:flutter/material.dart';
 import 'dart:typed_data';
 // WIDGET
 import 'package:final_flutter/widgets/uploadImage.dart';
 import 'package:final_flutter/widgets/utils.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 // FIREBASE
 import 'package:firebase_auth/firebase_auth.dart';
@@ -35,21 +38,20 @@ class _SignUpState extends State<SignUp> {
   final FocusNode _password = FocusNode();
   final FocusNode _cfpassword = FocusNode();
 
-  
+  final userRepo = Get.put(UserRepository());
 
   void _signUp() async {
     setState(() {
       _isSigningUp = true;
     });
-
-    _formKey.currentState!.validate();
-
     String username = _usernameController.text;
     String email = _emailController.text;
     String password = _passwordController.text;
 
     User? user = await _auth.createUserWithEmailAndPassWord(
-        email: email, password: password);
+      context: context,
+      email: email,
+      password: password);
 
     setState(() {
       _isSigningUp = false;
@@ -57,11 +59,12 @@ class _SignUpState extends State<SignUp> {
 
     if (user != null) {
       print("User is successfully created");
-
-      // Lưu username
-      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
-        'username': username,
-      });
+      final userModel = UserModel(
+        id: user.uid,
+        userName: _usernameController.text.trim(),
+        email: _emailController.text.trim()
+      );
+      await userRepo.createUser(context,userModel);
 
       Navigator.pushReplacement(
         context,
@@ -291,7 +294,12 @@ class _SignUpState extends State<SignUp> {
                       padding: const EdgeInsets.only(
                           top: 24, left: 24.0, right: 24.0),
                       child: ElevatedButton(
-                        onPressed: _signUp,
+                        onPressed: () {
+                          if(_formKey.currentState!.validate()){
+                              _signUp();
+                          }
+                          
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
                           minimumSize: const Size(double.infinity, 50),

@@ -11,7 +11,9 @@ class _CommunityState extends State<Community> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('DashBoard')),
+      appBar: AppBar(
+        title: const Text('DashBoard'),
+        automaticallyImplyLeading: false, ),
       body: const Center(
         child: Text('Community Screen', style: TextStyle(fontSize: 40)),
       ),

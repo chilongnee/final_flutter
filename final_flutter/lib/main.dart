@@ -17,6 +17,7 @@ void main() async {
       appId: "1:239108711351:android:b31df33083edbebfad3e32",
       messagingSenderId: "239108711351",
       projectId: "final-flutter-80ee0",
+      storageBucket: "gs://final-flutter-80ee0.appspot.com",
     ),
   );
   runApp(MyApp());

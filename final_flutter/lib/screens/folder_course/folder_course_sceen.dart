@@ -25,6 +25,7 @@ class _FolderState extends State<Folder> {
               'Thư viện',
               style: TextStyle(fontSize: 20.0),
             ),
+            automaticallyImplyLeading: false, 
             centerTitle: true,
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -173,10 +174,10 @@ class _FolderState extends State<Folder> {
     }
   }
 
-  Future<List<DocumentSnapshot>> getUsersByUsername(String userID) async {
+  Future<List<DocumentSnapshot>> getUsersByID(String userID) async {
     QuerySnapshot userSnapshot = await FirebaseFirestore.instance
         .collection('users')
-        .where('userID', isEqualTo: userID)
+        .where('id', isEqualTo: userID)
         .get();
     return userSnapshot.docs;
   }
@@ -192,7 +193,7 @@ class _FolderState extends State<Folder> {
           return StreamBuilder(
             stream: FirebaseFirestore.instance
                 .collection('users')
-                .where('userID', isEqualTo: currentUserID)
+                .where('id', isEqualTo: currentUserID)
                 .snapshots(),
             builder:
                 (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {

@@ -70,7 +70,7 @@ class _FolderDetailState extends State<FolderDetail> {
               return const Center(child: Text('Folder not found'));
             } else {
               final folderData = snapshot.data!;
-              final String folderUsername = folderData['username'] ?? 'Unknown';
+              final String folderUsername = folderData['userName'] ?? 'Unknown';
 
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
