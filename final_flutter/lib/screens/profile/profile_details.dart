@@ -373,6 +373,26 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                                     ),
                             ),
                           ),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                 left: 24.0, right: 24.0, bottom: 20),
+                            child: ElevatedButton(
+                              onPressed: () => _changePassword(userID),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.teal,
+                                minimumSize: const Size(double.infinity, 50),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(
+                                      16), // border radius
+                                ),
+                              ),
+                              child: const Text(
+                                      'Đổi mật khẩu',
+                                      style: TextStyle(
+                                          color: Colors.white, fontSize: 20),
+                                    ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -383,5 +403,118 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       ),
     );
   }
+  void _changePassword(String userID) {
+    String? oldPassword;
+    String? newPassword;
+    String? confirmPassword;
+
+    final _formKey = GlobalKey<FormState>(); // Key for the Form widget
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Đổi mật khẩu'),
+          content: SingleChildScrollView(
+            child: Form(
+              key: _formKey, // Assign the key to the Form widget
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    onChanged: (value) {
+                      oldPassword = value;
+                    },
+                    obscureText: true,
+                    decoration: InputDecoration(labelText: 'Mật khẩu cũ'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Vui lòng nhập mật khẩu cũ';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    onChanged: (value) {
+                      newPassword = value;
+                    },
+                    obscureText: true,
+                    decoration: InputDecoration(labelText: 'Mật khẩu mới'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Vui lòng nhập mật khẩu mới';
+                      }
+                      return null;
+                    },
+                  ),
+                  TextFormField(
+                    onChanged: (value) {
+                      confirmPassword = value;
+                    },
+                    obscureText: true,
+                    decoration: InputDecoration(labelText: 'Xác nhận mật khẩu'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Vui lòng nhập xác nhận mật khẩu';
+                      }
+                      if (value != newPassword) {
+                        return 'Mật khẩu không khớp';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context); // Close the dialog
+              },
+              child: Text('Hủy'),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  if (oldPassword == newPassword) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Mật khẩu mới phải khác với mật khẩu cũ'),
+                      ),
+                    );
+                  } else {
+                    try {
+                      AuthCredential credential = EmailAuthProvider.credential(
+                          email: _emailController.text, password: oldPassword!);
+                      await FirebaseAuth.instance.currentUser!
+                          .reauthenticateWithCredential(credential);
+                      await FirebaseAuth.instance.currentUser!
+                          .updatePassword(newPassword!);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Đổi mật khẩu thành công'),
+                        ),
+                      );
+                      Navigator.pop(context); // Close the dialog
+                    } catch (error) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Vui lòng nhập chính xác mật khẩu cũ'),
+                        ),
+                      );
+                    }
+                  }
+                }
+              },
+              child: Text('Đổi mật khẩu'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
 }
 
