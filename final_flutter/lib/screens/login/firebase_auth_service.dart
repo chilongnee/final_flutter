@@ -37,14 +37,25 @@ class FirebaseAuthService {
       );
       return credential.user;
     } catch (e) {
+      if(e.toString() == '[firebase_auth/email-already-in-use] The email address is already in use by another account.'){
       // Show snackbar using provided context
       ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Email đã tồn tại vui lòng nhập email khác'),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      }else {
+        ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.toString()),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
       );
+      }
+      
       print(e);
     }
     return null;

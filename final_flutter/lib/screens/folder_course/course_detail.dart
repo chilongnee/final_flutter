@@ -1,3 +1,4 @@
+import 'package:final_flutter/screens/folder_course/memory_card_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -111,10 +112,10 @@ class _CourseDetailState extends State<CourseDetail> {
                       ),
                     ),
                     const SizedBox(height: 16.0),
-                    _buildBox('Thẻ ghi nhớ'),
-                    _buildBox('Học (Quiz, Type)'),
-                    _buildBox('Kiểm tra'),
-                    _buildBox('Xếp hạng'),
+                    _buildBox(context,'Thẻ ghi nhớ'),
+                    _buildBox(context,'Học (Quiz, Type)'),
+                    _buildBox(context, 'Kiểm tra'),
+                    _buildBox(context,'Xếp hạng'),
                     const SizedBox(height: 16.0),
                     _buildBoxForVocabularies(),
                   ],
@@ -127,20 +128,59 @@ class _CourseDetailState extends State<CourseDetail> {
     );
   }
 
-  Widget _buildBox(String title) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: Text(
-        title,
-        style: const TextStyle(fontSize: 12.0),
+  Widget _buildBox(BuildContext context, String title) {
+    return GestureDetector(
+      onTap: () {
+        _handleBoxTap(context, title);
+      },
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10.0),
+        ),
+        child: Text(
+          title,
+          style: const TextStyle(fontSize: 12.0),
+        ),
       ),
     );
+  }
+
+  void _handleBoxTap(BuildContext context, String title) {
+    // Thực hiện điều gì đó dựa vào title
+    // Ví dụ: chuyển sang màn hình tương ứng với title
+    switch (title) {
+      case 'Thẻ ghi nhớ':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MemoryCardScreen(userId: widget.userId, courseId: widget.courseId,)),
+        );
+        break;
+      case 'Học (Quiz, Type)':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MemoryCardScreen(userId: widget.userId, courseId: widget.courseId)),
+        );
+        break;
+      case 'Kiểm tra':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MemoryCardScreen(userId: widget.userId, courseId: widget.courseId)),
+        );
+        break;
+      case 'Xếp hạng':
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MemoryCardScreen(userId: widget.userId, courseId: widget.courseId)),
+        );
+        break;
+      default:
+        // Xử lý mặc định nếu không có trường hợp nào khớp
+        break;
+    }
   }
 
   Widget _buildBoxForVocabularies() {
@@ -232,4 +272,5 @@ class _CourseDetailState extends State<CourseDetail> {
         .get();
     return vocabularySnapshot.docs;
   }
+
 }

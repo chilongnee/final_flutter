@@ -44,8 +44,8 @@ class _SignUpState extends State<SignUp> {
     setState(() {
       _isSigningUp = true;
     });
-    String username = _usernameController.text;
-    String email = _emailController.text;
+    String username = _usernameController.text.trim();
+    String email = _emailController.text.trim();
     String password = _passwordController.text;
 
     User? user = await _auth.createUserWithEmailAndPassWord(
@@ -60,16 +60,10 @@ class _SignUpState extends State<SignUp> {
 
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'id': user.uid,
-        'userID': user.uid,
-        'username': username,
+        'userName': username,
         'email': email,
       });
 
-      // final userModel = UserModel(
-      //     id: user.uid,
-      //     userName: _usernameController.text.trim(),
-      //     email: _emailController.text.trim());
-      // await userRepo.createUser(context, userModel);
 
       Navigator.pushReplacement(
         context,
@@ -82,6 +76,8 @@ class _SignUpState extends State<SignUp> {
 
   @override
   Widget build(BuildContext context) {
+    var width =  MediaQuery.of(context).size.width;
+    var height =  MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Colors.grey[200],
       body: Center(

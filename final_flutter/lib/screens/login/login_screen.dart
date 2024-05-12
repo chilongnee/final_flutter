@@ -50,13 +50,35 @@ class _LoginState extends State<Login> {
         context,
         MaterialPageRoute(builder: (context) => const Home()),
       );
+      // Show snackbar using provided context
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đăng nhập thành công'),
+          backgroundColor: Colors.green,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
     } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Thông tin không chính xác! Vui lòng kiểm tra lại"),
+          duration: Duration(seconds: 2),
+          action: SnackBarAction(
+            label: 'Đóng',
+            onPressed: () {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            },
+          ),
+        ),
+      );
       print("Some error happend");
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    var width =  MediaQuery.of(context).size.width;
+    var height =  MediaQuery.of(context).size.height;
     return Scaffold(
       backgroundColor: Colors.grey[200],
       body: Center(
@@ -86,7 +108,7 @@ class _LoginState extends State<Login> {
               ),
               Container(
                 margin: const EdgeInsets.only(
-                  right: 50,
+                  right: 24,
                 ),
                 child: const Text(
                   'HELLO THERE,\nWELCOME BACK',
@@ -97,7 +119,7 @@ class _LoginState extends State<Login> {
                 ),
               ),
               Container(
-                margin: const EdgeInsets.only(right: 172, top: 20),
+                margin: const EdgeInsets.only(right: 165, top: 20),
                 child: const Text(
                   'Sign in to countinue',
                   style: TextStyle(
@@ -206,7 +228,7 @@ class _LoginState extends State<Login> {
                             "Remember Me",
                             style: TextStyle(color: Colors.black, fontSize: 14),
                           ),
-                          const SizedBox(width: 100),
+                          SizedBox(width: MediaQuery.of(context).size.width * 0.22),
                           GestureDetector(
                             onTap: () {
                               Navigator.push(
@@ -229,7 +251,11 @@ class _LoginState extends State<Login> {
                     Padding(
                       padding: const EdgeInsets.only(left: 24.0, right: 24.0),
                       child: ElevatedButton(
-                        onPressed: _signIn,
+                        onPressed: (){
+                          if(_formKey.currentState!.validate()){
+                            _signIn();
+                          }
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
                           minimumSize: const Size(double.infinity, 50),

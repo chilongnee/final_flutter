@@ -153,7 +153,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       body: SingleChildScrollView(
         child: Container(
             height: screenSize.height,
-            color: Colors.teal,
+            color: Colors.teal.shade200,
             child: Column(
               children: [
                 Padding(

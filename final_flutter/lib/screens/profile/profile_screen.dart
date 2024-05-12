@@ -84,8 +84,8 @@ Future<void> loadImage() async {
       ),
       body: SingleChildScrollView(
         child: Container(
-          height: screenSize.height - 150,
-          color: Colors.teal,
+          height: screenSize.height * 0.817,
+          color: Colors.teal.shade200,
           child: FutureBuilder(
             future: controller.getUserData(),
             builder: (context, snapshot) {
@@ -127,7 +127,7 @@ Future<void> loadImage() async {
                                                   radius: screenSize.height * 0.047,
                                                   backgroundColor: Colors.teal,
                                                   child: CircleAvatar(
-                                                    radius: 30,
+                                                    radius: screenSize.height * 0.041,
                                                     backgroundImage: MemoryImage(_image!),
                                                     backgroundColor: const Color.fromRGBO(
                                                         187, 237, 242, 1),
@@ -137,26 +137,13 @@ Future<void> loadImage() async {
                                                   radius: screenSize.height * 0.047,
                                                   backgroundColor: Colors.teal,
                                                   child: CircleAvatar(
-                                                    radius: 30,
+                                                    radius: screenSize.height * 0.041,
                                                     backgroundImage:NetworkImage(
                                                         'https://static-00.iconduck.com/assets.00/avatar-default-dark-icon-512x512-3ixx3cy9.png'),
                                                     backgroundColor:
                                                         Color.fromRGBO(187, 237, 242, 1),
                                                   ),
                                                 ),
-                                              // CircleAvatar(
-                                              //   radius:
-                                              //       screenSize.height * 0.047,
-                                              //   backgroundColor: Colors.teal,
-                                              //   child: CircleAvatar(
-                                              //     radius: 30,
-                                              //     backgroundImage: NetworkImage(
-                                              //         'https://static-00.iconduck.com/assets.00/avatar-default-dark-icon-512x512-3ixx3cy9.png'),
-                                              //     backgroundColor:
-                                              //         Color.fromRGBO(
-                                              //             187, 237, 242, 1),
-                                              //   ),
-                                              // ),
                                               ElevatedButton(
                                                 onPressed: () => _editProfile(),
                                                 style: ElevatedButton.styleFrom(
@@ -284,7 +271,7 @@ Future<void> loadImage() async {
                                           radius: screenSize.height * 0.047,
                                           backgroundColor: Colors.teal,
                                           child: CircleAvatar(
-                                            radius: 30,
+                                            radius: screenSize.height * 0.041,
                                             backgroundImage: NetworkImage(
                                                 'https://i.pinimg.com/originals/ea/ca/4f/eaca4fcb632754945995f7927a8d4aec.png'),
                                             backgroundColor:
@@ -300,7 +287,7 @@ Future<void> loadImage() async {
                                           radius: screenSize.height * 0.047,
                                           backgroundColor: Colors.teal,
                                           child: CircleAvatar(
-                                            radius: 30,
+                                            radius: screenSize.height * 0.041,
                                             backgroundImage: NetworkImage(
                                                 'https://cdn-icons-png.flaticon.com/512/7937/7937682.png'),
                                             backgroundColor:
@@ -317,46 +304,7 @@ Future<void> loadImage() async {
                           ),
                         ),
                       ),
-                      // Stack(
-                      //       children: [
-                      //         _image != null
-                      //             ? Padding(
-                      //                 padding: const EdgeInsets.only(top: 32.0),
-                      //                 child: CircleAvatar(
-                      //                   radius: 68,
-                      //                   backgroundColor: Colors.teal,
-                      //                   child: CircleAvatar(
-                      //                     radius: 64,
-                      //                     backgroundImage: MemoryImage(_image!),
-                      //                     backgroundColor:
-                      //                         const Color.fromRGBO(187, 237, 242, 1),
-                      //                   ),
-                      //                 ),
-                      //               )
-                      //             : const Padding(
-                      //                 padding: EdgeInsets.only(top: 32.0),
-                      //                 child: CircleAvatar(
-                      //                   radius: 68,
-                      //                   backgroundColor: Colors.teal,
-                      //                   child: CircleAvatar(
-                      //                     radius: 64,
-                      //                     backgroundImage: NetworkImage(
-                      //                         'https://static-00.iconduck.com/assets.00/avatar-default-dark-icon-512x512-3ixx3cy9.png'),
-                      //                     backgroundColor: Color.fromRGBO(187, 237, 242, 1),
-                      //                   ),
-                      //                 ),
-                      //               ),
-                      //         Positioned(
-                      //             bottom: -10,
-                      //             left: 90,
-                      //             child: IconButton(
-                      //               onPressed: selectImage,
-                      //               icon: const Icon(Icons.add_a_photo),
-                      //               iconSize: 32,
-                      //             )),
-                      //       ],
-                      //     ),
-                      SizedBox(height: 100),
+                      SizedBox(height: screenSize.height * 0.2),
                       ElevatedButton(
                         onPressed: () => _logOut(),
                         style: ElevatedButton.styleFrom(
