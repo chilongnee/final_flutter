@@ -35,7 +35,6 @@ class _FolderDetailState extends State<FolderDetail> {
 
     return Scaffold(
       appBar: AppBar(
-        // Sử dụng FutureBuilder để thiết lập tiêu đề của AppBar từ dữ liệu của folder
         title: FutureBuilder(
           future: _folderFuture,
           builder:
@@ -70,7 +69,7 @@ class _FolderDetailState extends State<FolderDetail> {
               return const Center(child: Text('Folder not found'));
             } else {
               final folderData = snapshot.data!;
-              final String folderUsername = folderData['userName'] ?? 'Unknown';
+              final String folderUsername = folderData['username'] ?? 'Unknown';
 
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(16.0),
@@ -84,7 +83,6 @@ class _FolderDetailState extends State<FolderDetail> {
                         style: const TextStyle(fontSize: 10),
                       ),
                     ),
-                    // Thêm các thông tin khác của folder tại đây
                   ],
                 ),
               );

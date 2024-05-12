@@ -71,7 +71,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
     }
   }
 
-  void _saveCourseDataToFirestore() async {
+  Future<void> _saveCourseDataToFirestore(BuildContext context) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       String userId = user.uid;
@@ -80,9 +80,6 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
           .doc(userId)
           .collection('courses')
           .doc();
-
-      // print('Title: ${titleController.text}');
-      // print('Progress: $selectedProgress');
 
       await courseRef.set({
         'title': titleController.text,
@@ -102,10 +99,6 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
             List<String> selectedTypes =
                 vocabContainer.selectedTypes?.value ?? [];
 
-            // print('Term: ${termController.text}');
-            // print('Definition: ${definitionController.text}');
-            // print('Selected Types: $selectedTypes');
-
             await courseRef.collection('vocabularies').add({
               'term': termController.text,
               'definition': definitionController.text,
@@ -114,6 +107,8 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
           }
         }
       }
+
+      Navigator.pop(context);
     }
   }
 
@@ -126,7 +121,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
           IconButton(
             icon: const Icon(Icons.save, size: 28, color: Colors.black),
             onPressed: () {
-              _saveCourseDataToFirestore();
+              _saveCourseDataToFirestore(context);
             },
           ),
         ],

@@ -23,14 +23,14 @@ class SignUp extends StatefulWidget {
 
 class _SignUpState extends State<SignUp> {
   final FirebaseAuthService _auth = FirebaseAuthService();
-  
+
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final cfpasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _obscureText = true;
-  bool _obscureText2 = true;
+  final bool _obscureText2 = true;
   final bool _rememberMe = false;
   bool _isSigningUp = false;
   final FocusNode _username = FocusNode();
@@ -49,9 +49,7 @@ class _SignUpState extends State<SignUp> {
     String password = _passwordController.text;
 
     User? user = await _auth.createUserWithEmailAndPassWord(
-      context: context,
-      email: email,
-      password: password);
+        context: context, email: email, password: password);
 
     setState(() {
       _isSigningUp = false;
@@ -59,12 +57,19 @@ class _SignUpState extends State<SignUp> {
 
     if (user != null) {
       print("User is successfully created");
-      final userModel = UserModel(
-        id: user.uid,
-        userName: _usernameController.text.trim(),
-        email: _emailController.text.trim()
-      );
-      await userRepo.createUser(context,userModel);
+
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'id': user.uid,
+        'userID': user.uid,
+        'username': username,
+        'email': email,
+      });
+
+      // final userModel = UserModel(
+      //     id: user.uid,
+      //     userName: _usernameController.text.trim(),
+      //     email: _emailController.text.trim());
+      // await userRepo.createUser(context, userModel);
 
       Navigator.pushReplacement(
         context,
@@ -78,7 +83,7 @@ class _SignUpState extends State<SignUp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:  Colors.grey[200],
+      backgroundColor: Colors.grey[200],
       body: Center(
         child: SingleChildScrollView(
           child: Column(
@@ -111,7 +116,6 @@ class _SignUpState extends State<SignUp> {
                   )
                 ],
               ),
-              
               Form(
                 key: _formKey,
                 child: Column(
@@ -126,18 +130,17 @@ class _SignUpState extends State<SignUp> {
                           keyboardType: TextInputType.text,
                           textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide:BorderSide(color: Colors.white)
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide:BorderSide(color: Colors.deepPurple)
-                          ),
-                          hintText: 'User Name',
-                          fillColor: Colors.white,
-                          filled: true
-                        ),
+                              enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide:
+                                      const BorderSide(color: Colors.white)),
+                              focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                      color: Colors.deepPurple)),
+                              hintText: 'User Name',
+                              fillColor: Colors.white,
+                              filled: true),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return 'Please enter your username';
@@ -160,18 +163,17 @@ class _SignUpState extends State<SignUp> {
                           keyboardType: TextInputType.emailAddress,
                           textInputAction: TextInputAction.next,
                           decoration: InputDecoration(
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide:BorderSide(color: Colors.white)
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide:BorderSide(color: Colors.deepPurple)
-                          ),
-                          hintText: 'Email',
-                          fillColor: Colors.white,
-                          filled: true
-                        ),
+                              enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide:
+                                      const BorderSide(color: Colors.white)),
+                              focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: const BorderSide(
+                                      color: Colors.deepPurple)),
+                              hintText: 'Email',
+                              fillColor: Colors.white,
+                              filled: true),
                           validator: (String? value) {
                             final RegExp emailRegExp =
                                 RegExp(r'^[^@]+@[^@]+\.[^@]+$');
@@ -182,7 +184,6 @@ class _SignUpState extends State<SignUp> {
                             return null;
                           },
                         ),
-                        
                       ),
                     ),
                     Padding(
@@ -198,34 +199,34 @@ class _SignUpState extends State<SignUp> {
                           maxLength: 20,
                           decoration: InputDecoration(
                             counterText: '',
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide:BorderSide(color: Colors.white)
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide:BorderSide(color: Colors.deepPurple)
-                          ),
-                          hintText: 'Password',
-                          fillColor: Colors.white,
-                          filled: true,
-                          suffixIcon: Padding(
-                            padding: const EdgeInsets.only(right: 10.0),
-                            child: IconButton(
-                              icon: Icon(
-                                _obscureText
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                                color: Colors.black,
+                            enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                    const BorderSide(color: Colors.white)),
+                            focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                    const BorderSide(color: Colors.deepPurple)),
+                            hintText: 'Password',
+                            fillColor: Colors.white,
+                            filled: true,
+                            suffixIcon: Padding(
+                              padding: const EdgeInsets.only(right: 10.0),
+                              child: IconButton(
+                                icon: Icon(
+                                  _obscureText
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: Colors.black,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscureText = !_obscureText;
+                                  });
+                                },
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscureText = !_obscureText;
-                                });
-                              },
                             ),
                           ),
-                        ),
                           validator: (String? value) {
                             if (value == null || value.length < 6) {
                               _password.requestFocus();
@@ -249,34 +250,34 @@ class _SignUpState extends State<SignUp> {
                           maxLength: 20,
                           decoration: InputDecoration(
                             counterText: '',
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide:BorderSide(color: Colors.white)
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide:BorderSide(color: Colors.deepPurple)
-                          ),
-                          hintText: 'Password',
-                          fillColor: Colors.white,
-                          filled: true,
-                          suffixIcon: Padding(
-                            padding: const EdgeInsets.only(right: 10.0),
-                            child: IconButton(
-                              icon: Icon(
-                                _obscureText
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                                color: Colors.black,
+                            enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                    const BorderSide(color: Colors.white)),
+                            focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide:
+                                    const BorderSide(color: Colors.deepPurple)),
+                            hintText: 'Password',
+                            fillColor: Colors.white,
+                            filled: true,
+                            suffixIcon: Padding(
+                              padding: const EdgeInsets.only(right: 10.0),
+                              child: IconButton(
+                                icon: Icon(
+                                  _obscureText
+                                      ? Icons.visibility
+                                      : Icons.visibility_off,
+                                  color: Colors.black,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    _obscureText = !_obscureText;
+                                  });
+                                },
                               ),
-                              onPressed: () {
-                                setState(() {
-                                  _obscureText = !_obscureText;
-                                });
-                              },
                             ),
                           ),
-                        ),
                           validator: (String? value) {
                             if (value == null || value.length < 6) {
                               _cfpassword.requestFocus();
@@ -295,17 +296,15 @@ class _SignUpState extends State<SignUp> {
                           top: 24, left: 24.0, right: 24.0),
                       child: ElevatedButton(
                         onPressed: () {
-                          if(_formKey.currentState!.validate()){
-                              _signUp();
+                          if (_formKey.currentState!.validate()) {
+                            _signUp();
                           }
-                          
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
                           minimumSize: const Size(double.infinity, 50),
                           shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.circular(16), // border radius
+                            borderRadius: BorderRadius.circular(16),
                           ),
                         ),
                         child: _isSigningUp

@@ -15,17 +15,17 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfileDetails extends StatefulWidget {
-  const ProfileDetails({Key? key}) : super(key: key);
+  const ProfileDetails({super.key});
 
   @override
   _ProfileDetailsState createState() => _ProfileDetailsState();
 }
 
 class _ProfileDetailsState extends State<ProfileDetails> {
-  TextEditingController _usernameController = TextEditingController();
-  TextEditingController _emailController = TextEditingController();
-  TextEditingController _birthDayController = TextEditingController();
-  TextEditingController _genderController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _birthDayController = TextEditingController();
+  final TextEditingController _genderController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
   String? userName;
@@ -41,9 +41,9 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       _image = img;
     });
   }
+
   final controller = Get.put(ProfileController());
 
-  
   void loadUserData() async {
     gender = _genderController.text;
     controller.getUserData().then((userDetails) async {
@@ -74,70 +74,74 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     loadUserData();
   }
 
-  void updateUserDetails() async{
+  void updateUserDetails() async {
     String updatedUsername = _usernameController.text;
     String updatedEmail = _emailController.text;
     String updatedBirthDay = _birthDayController.text;
     String updatedGender = _genderController.text;
 
-    
-    controller.updateUserData(updatedUsername, updatedEmail, updatedBirthDay, updatedGender);
+    controller.updateUserData(
+        updatedUsername, updatedEmail, updatedBirthDay, updatedGender);
 
     setState(() {
-      _isUpdate = !_isUpdate; 
+      _isUpdate = !_isUpdate;
     });
 
-    if(!_isUpdate){
-      if(_image != null) String resp = await StoreData().saveData(id: userID, file: _image!);
+    if (!_isUpdate) {
+      if (_image != null)
+        String resp = await StoreData().saveData(id: userID, file: _image!);
     }
   }
-  
-
 
   void _showCountryBottomSheet(BuildContext context) async {
-  final selectedGender = await showModalBottomSheet<String>(
-    context: context,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-    ),
-    builder: (BuildContext context) {
-      return Container(
-        height: MediaQuery.of(context).size.height * 0.2,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Expanded(
-              child: ListView.builder(
-                itemCount: genderList.length,
-                itemBuilder: (context, index) {
-                  final gender = genderList[index];
-                  return ListTile(
-                    title: Text(gender),
-                    onTap: () {
-                      Navigator.pop(context, gender);
-                    },
-                    trailing: _genderController.text == gender ? Icon(Icons.check, color: Colors.green,) : null, // Display check mark icon next to selected country
-                  );
-                },
+    final selectedGender = await showModalBottomSheet<String>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (BuildContext context) {
+        return SizedBox(
+          height: MediaQuery.of(context).size.height * 0.2,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Expanded(
+                child: ListView.builder(
+                  itemCount: genderList.length,
+                  itemBuilder: (context, index) {
+                    final gender = genderList[index];
+                    return ListTile(
+                      title: Text(gender),
+                      onTap: () {
+                        Navigator.pop(context, gender);
+                      },
+                      trailing: _genderController.text == gender
+                          ? const Icon(
+                              Icons.check,
+                              color: Colors.green,
+                            )
+                          : null, // Display check mark icon next to selected country
+                    );
+                  },
+                ),
               ),
-            ),
-          ],
-        ),
-      );
-    },
-  );
+            ],
+          ),
+        );
+      },
+    );
 
-  if (selectedGender != null) {
-    setState(() {
-      _genderController.text = selectedGender;
-    });
+    if (selectedGender != null) {
+      setState(() {
+        _genderController.text = selectedGender;
+      });
+    }
   }
-}
 
   final List<String> genderList = [
-  'Nam',
-  'Nữ',
-];
+    'Nam',
+    'Nữ',
+  ];
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(ProfileController());
@@ -187,14 +191,14 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                                         ),
                                       ),
                                     )
-                                  : Padding(
+                                  : const Padding(
                                       padding: EdgeInsets.only(top: 32.0),
                                       child: CircleAvatar(
                                         radius: 68,
                                         backgroundColor: Colors.teal,
                                         child: CircleAvatar(
                                           radius: 64,
-                                          backgroundImage:NetworkImage(
+                                          backgroundImage: NetworkImage(
                                               'https://static-00.iconduck.com/assets.00/avatar-default-dark-icon-512x512-3ixx3cy9.png'),
                                           backgroundColor:
                                               Color.fromRGBO(187, 237, 242, 1),
@@ -222,19 +226,21 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                               decoration: InputDecoration(
                                 enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Colors.teal)),
+                                    borderSide:
+                                        const BorderSide(color: Colors.teal)),
                                 focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide:
-                                        BorderSide(color: Colors.deepPurple)),
+                                    borderSide: const BorderSide(
+                                        color: Colors.deepPurple)),
                                 disabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Colors.teal)),
+                                    borderSide:
+                                        const BorderSide(color: Colors.teal)),
                                 labelText: 'Username',
                                 hintText: 'Username',
                                 fillColor: Colors.grey[300],
                                 filled: true,
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                     vertical: 10, horizontal: 10),
                               ),
                             ),
@@ -250,19 +256,21 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                               decoration: InputDecoration(
                                 enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Colors.teal)),
+                                    borderSide:
+                                        const BorderSide(color: Colors.teal)),
                                 focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide:
-                                        BorderSide(color: Colors.deepPurple)),
+                                    borderSide: const BorderSide(
+                                        color: Colors.deepPurple)),
                                 disabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Colors.teal)),
+                                    borderSide:
+                                        const BorderSide(color: Colors.teal)),
                                 labelText: 'Email',
                                 hintText: 'Email',
                                 fillColor: Colors.grey[300],
                                 filled: true,
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                     vertical: 10, horizontal: 10),
                               ),
                             ),
@@ -277,38 +285,43 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                               readOnly: true,
                               enabled: _isUpdate,
                               decoration: InputDecoration(
-                                suffix: Icon(Icons.calendar_today),
+                                suffix: const Icon(Icons.calendar_today),
                                 enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Colors.teal)),
+                                    borderSide:
+                                        const BorderSide(color: Colors.teal)),
                                 focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide:
-                                        BorderSide(color: Colors.deepPurple)),
+                                    borderSide: const BorderSide(
+                                        color: Colors.deepPurple)),
                                 disabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Colors.teal)),
+                                    borderSide:
+                                        const BorderSide(color: Colors.teal)),
                                 labelText: 'BirthDay',
                                 hintText: 'Enter your birthday',
                                 fillColor: Colors.grey[300],
                                 filled: true,
-                                contentPadding: EdgeInsets.symmetric(
+                                contentPadding: const EdgeInsets.symmetric(
                                     vertical: 10, horizontal: 10),
                               ),
                               onTap: () async {
                                 final DateTime? picked = await showDatePicker(
                                   context: context,
                                   initialDate: DateTime.now().subtract(
-                                      Duration(days: 365 * 18)), // Adjusted initialDate
-                                  firstDate:
-                                      DateTime.now().subtract(Duration(days: 365 * 99)),
-                                  lastDate:
-                                      DateTime.now().subtract(Duration(days: 365 * 18)),
+                                      const Duration(
+                                          days: 365 *
+                                              18)), // Adjusted initialDate
+                                  firstDate: DateTime.now()
+                                      .subtract(const Duration(days: 365 * 99)),
+                                  lastDate: DateTime.now()
+                                      .subtract(const Duration(days: 365 * 18)),
                                 );
                                 if (picked != null) {
                                   setState(() {
                                     _selectedDate = picked;
-                                    _birthDayController.text = "${picked.day}/${picked.month}/${picked.year}";
+                                    _birthDayController.text =
+                                        "${picked.day}/${picked.month}/${picked.year}";
                                   });
                                 }
                               },
@@ -317,34 +330,36 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                           Padding(
                             padding: const EdgeInsets.only(right: 24, left: 24),
                             child: GestureDetector(
-                      onTap: () => _showCountryBottomSheet(context),
-                      child: AbsorbPointer(
-                        child: TextFormField(
-                              controller: _genderController,
-                              keyboardType: TextInputType.emailAddress,
-                              textInputAction: TextInputAction.next,
-                              enabled: _isUpdate,
-                              readOnly: true,
-                              decoration: InputDecoration(
-                                enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Colors.teal)),
-                                focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide:
-                                        BorderSide(color: Colors.deepPurple)),
-                                disabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide: BorderSide(color: Colors.teal)),
-                                labelText: 'Gender',
-                                hintText: 'Choose your gender',
-                                fillColor: Colors.grey[300],
-                                filled: true,
-                                contentPadding: EdgeInsets.symmetric(
-                                    vertical: 10, horizontal: 10),
+                              onTap: () => _showCountryBottomSheet(context),
+                              child: AbsorbPointer(
+                                child: TextFormField(
+                                  controller: _genderController,
+                                  keyboardType: TextInputType.emailAddress,
+                                  textInputAction: TextInputAction.next,
+                                  enabled: _isUpdate,
+                                  readOnly: true,
+                                  decoration: InputDecoration(
+                                    enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(
+                                            color: Colors.teal)),
+                                    focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(
+                                            color: Colors.deepPurple)),
+                                    disabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(
+                                            color: Colors.teal)),
+                                    labelText: 'Gender',
+                                    hintText: 'Choose your gender',
+                                    fillColor: Colors.grey[300],
+                                    filled: true,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        vertical: 10, horizontal: 10),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
                             ),
                           ),
                           Padding(
@@ -375,7 +390,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                           ),
                           Padding(
                             padding: const EdgeInsets.only(
-                                 left: 24.0, right: 24.0, bottom: 20),
+                                left: 24.0, right: 24.0, bottom: 20),
                             child: ElevatedButton(
                               onPressed: () => _changePassword(userID),
                               style: ElevatedButton.styleFrom(
@@ -387,10 +402,10 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                                 ),
                               ),
                               child: const Text(
-                                      'Đổi mật khẩu',
-                                      style: TextStyle(
-                                          color: Colors.white, fontSize: 20),
-                                    ),
+                                'Đổi mật khẩu',
+                                style: TextStyle(
+                                    color: Colors.white, fontSize: 20),
+                              ),
                             ),
                           ),
                         ],
@@ -403,21 +418,22 @@ class _ProfileDetailsState extends State<ProfileDetails> {
       ),
     );
   }
+
   void _changePassword(String userID) {
     String? oldPassword;
     String? newPassword;
     String? confirmPassword;
 
-    final _formKey = GlobalKey<FormState>(); // Key for the Form widget
+    final formKey = GlobalKey<FormState>(); // Key for the Form widget
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Đổi mật khẩu'),
+          title: const Text('Đổi mật khẩu'),
           content: SingleChildScrollView(
             child: Form(
-              key: _formKey, // Assign the key to the Form widget
+              key: formKey, // Assign the key to the Form widget
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -426,7 +442,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       oldPassword = value;
                     },
                     obscureText: true,
-                    decoration: InputDecoration(labelText: 'Mật khẩu cũ'),
+                    decoration: const InputDecoration(labelText: 'Mật khẩu cũ'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Vui lòng nhập mật khẩu cũ';
@@ -439,7 +455,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       newPassword = value;
                     },
                     obscureText: true,
-                    decoration: InputDecoration(labelText: 'Mật khẩu mới'),
+                    decoration:
+                        const InputDecoration(labelText: 'Mật khẩu mới'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Vui lòng nhập mật khẩu mới';
@@ -452,7 +469,8 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       confirmPassword = value;
                     },
                     obscureText: true,
-                    decoration: InputDecoration(labelText: 'Xác nhận mật khẩu'),
+                    decoration:
+                        const InputDecoration(labelText: 'Xác nhận mật khẩu'),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Vui lòng nhập xác nhận mật khẩu';
@@ -472,14 +490,14 @@ class _ProfileDetailsState extends State<ProfileDetails> {
               onPressed: () {
                 Navigator.pop(context); // Close the dialog
               },
-              child: Text('Hủy'),
+              child: const Text('Hủy'),
             ),
             TextButton(
               onPressed: () async {
-                if (_formKey.currentState!.validate()) {
+                if (formKey.currentState!.validate()) {
                   if (oldPassword == newPassword) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
+                      const SnackBar(
                         content: Text('Mật khẩu mới phải khác với mật khẩu cũ'),
                       ),
                     );
@@ -492,14 +510,14 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                       await FirebaseAuth.instance.currentUser!
                           .updatePassword(newPassword!);
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
+                        const SnackBar(
                           content: Text('Đổi mật khẩu thành công'),
                         ),
                       );
                       Navigator.pop(context); // Close the dialog
                     } catch (error) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
+                        const SnackBar(
                           content: Text('Vui lòng nhập chính xác mật khẩu cũ'),
                         ),
                       );
@@ -507,14 +525,11 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                   }
                 }
               },
-              child: Text('Đổi mật khẩu'),
+              child: const Text('Đổi mật khẩu'),
             ),
           ],
         );
       },
     );
   }
-
-
 }
-

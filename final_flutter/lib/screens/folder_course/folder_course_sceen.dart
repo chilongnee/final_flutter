@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'folder_detail.dart';
+import 'course_detail.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class Folder extends StatefulWidget {
@@ -25,7 +26,7 @@ class _FolderState extends State<Folder> {
               'Thư viện',
               style: TextStyle(fontSize: 20.0),
             ),
-            automaticallyImplyLeading: false, 
+            automaticallyImplyLeading: false,
             centerTitle: true,
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(kToolbarHeight),
@@ -73,93 +74,84 @@ class _FolderState extends State<Folder> {
   }
 
   Widget _buildFolderTab(double screenWidth) {
-    return StreamBuilder(
-      stream: FirebaseFirestore.instance.collection('users').snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          print(snapshot);
-          return const Center(child: Text('Error'));
-        } else {
-          final List<DocumentSnapshot> users = snapshot.data!.docs;
-          return ListView.builder(
-            itemCount: users.length,
-            itemBuilder: (BuildContext context, int index) {
-              final user = users[index];
-              return StreamBuilder(
-                stream: FirebaseFirestore.instance
-                    .collection('users')
-                    .doc(user.id)
-                    .collection('folders')
-                    .snapshots(),
-                builder: (BuildContext context,
-                    AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return const Center(child: Text('Error'));
-                  } else {
-                    final List<DocumentSnapshot> folders = snapshot.data!.docs;
-                    return ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: folders.length,
-                      itemBuilder: (BuildContext context, int index) {
-                        final folder = folders[index];
-                        return GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => FolderDetail(
-                                  folderId: folder.id,
-                                  userId: user.id,
-                                ),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            width: screenWidth,
-                            margin: const EdgeInsets.fromLTRB(
-                                20.0, 10.0, 20.0, 10.0),
-                            padding: const EdgeInsets.all(12.0),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  folder['title'],
-                                  style: const TextStyle(
-                                      fontSize: 18.0,
-                                      fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  folder['username'],
-                                  style: const TextStyle(fontSize: 14.0),
-                                ),
-                                if (folder['description'] != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: Text(
-                                      folder['description'],
-                                      style: const TextStyle(fontSize: 16.0),
-                                    ),
-                                  ),
-                              ],
+    return FutureBuilder<User?>(
+      future: getCurrentUser(),
+      builder: (BuildContext context, AsyncSnapshot<User?> userSnapshot) {
+        final User? user = userSnapshot.data;
+        if (user != null) {
+          String currentUserID = user.uid;
+
+          return StreamBuilder(
+            stream: FirebaseFirestore.instance
+                .collection('users')
+                .doc(currentUserID)
+                .collection('folders')
+                .snapshots(),
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (snapshot.hasError) {
+                return const Center(child: Text('Error'));
+              } else {
+                final List<DocumentSnapshot> folders = snapshot.data!.docs;
+                return ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: folders.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    final folder = folders[index];
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FolderDetail(
+                              folderId: folder.id,
+                              userId: currentUserID,
                             ),
                           ),
                         );
                       },
+                      child: Container(
+                        width: screenWidth,
+                        margin:
+                            const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                        padding: const EdgeInsets.all(12.0),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              folder['title'],
+                              style: const TextStyle(
+                                  fontSize: 18.0, fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              folder['username'],
+                              style: const TextStyle(fontSize: 14.0),
+                            ),
+                            if (folder['description'] != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Text(
+                                  folder['description'],
+                                  style: const TextStyle(fontSize: 16.0),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
                     );
-                  }
-                },
-              );
+                  },
+                );
+              }
             },
           );
+        } else {
+          return Container();
         }
       },
     );
@@ -188,25 +180,25 @@ class _FolderState extends State<Folder> {
       builder: (BuildContext context, AsyncSnapshot<User?> userSnapshot) {
         final User? user = userSnapshot.data;
         if (user != null) {
-          String currentUserID = user.uid ?? '';
+          String currentUserID = user.uid;
 
           return StreamBuilder(
             stream: FirebaseFirestore.instance
                 .collection('users')
-                .where('id', isEqualTo: currentUserID)
+                .doc(currentUserID)
                 .snapshots(),
-            builder:
-                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            builder: (BuildContext context,
+                AsyncSnapshot<DocumentSnapshot> snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
                 return const Center(child: Text('Error'));
               } else {
-                final List<DocumentSnapshot> users = snapshot.data!.docs;
-                if (users.isEmpty) {
+                final DocumentSnapshot userData = snapshot.data!;
+                if (!userData.exists) {
                   return const Center(child: Text('Không tìm thấy người dùng'));
                 } else {
-                  final userId = users[0].id;
+                  final userId = userData.id;
                   return StreamBuilder(
                     stream: FirebaseFirestore.instance
                         .collection('users')
@@ -229,7 +221,15 @@ class _FolderState extends State<Folder> {
                             final course = courses[index];
                             return GestureDetector(
                               onTap: () {
-                                print(courses[index].id);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => CourseDetail(
+                                      courseId: course.id,
+                                      userId: currentUserID,
+                                    ),
+                                  ),
+                                );
                               },
                               child: Container(
                                 width: screenWidth,

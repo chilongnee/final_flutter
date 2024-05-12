@@ -19,6 +19,7 @@ class AddFolderScreen extends StatelessWidget {
 
       if (user != null) {
         String userUid = user.uid;
+        print(userUid);
 
         FirebaseFirestore.instance
             .collection('users')
