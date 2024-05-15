@@ -40,7 +40,12 @@ dependencies:
 
   get: ^4.6.6
   http: ^1.2.1
+
+
+
   flutter_card_swiper: ^7.0.1
+  percent_indicator: ^4.2.3
+  
   firebase_core: ^2.27.0
   flutter_social_button: ^1.1.4
   image_picker: ^1.0.7
@@ -76,6 +81,7 @@ flutter:
     - assets/logo.png
     - assets/LHT.png
     - assets/LHT2.png
+    - assets/image_congrat.png
     # - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

@@ -99,11 +99,16 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
             List<String> selectedTypes =
                 vocabContainer.selectedTypes?.value ?? [];
 
-            await courseRef.collection('vocabularies').add({
-              'term': termController.text,
-              'definition': definitionController.text,
-              'types': selectedTypes,
-            });
+            DocumentReference vocabRef = await courseRef
+              .collection('vocabularies')
+              .add({
+                'status': 'Đang học',
+                'term': termController.text,
+                'definition': definitionController.text,
+                'types': selectedTypes,
+              });
+              String vocabId = vocabRef.id;
+              await vocabRef.update({'id': vocabId});
           }
         }
       }

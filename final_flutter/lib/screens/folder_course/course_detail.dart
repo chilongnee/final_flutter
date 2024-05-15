@@ -1,4 +1,5 @@
-import 'package:final_flutter/screens/folder_course/memory_card_screen.dart';
+import 'package:final_flutter/screens/folder_course/memory_card.dart';
+import 'package:final_flutter/screens/folder_course/summarize_memory_card.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -154,10 +155,7 @@ class _CourseDetailState extends State<CourseDetail> {
     // Ví dụ: chuyển sang màn hình tương ứng với title
     switch (title) {
       case 'Thẻ ghi nhớ':
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => MemoryCardScreen(userId: widget.userId, courseId: widget.courseId,)),
-        );
+        navigateToSummarize(context);
         break;
       case 'Học (Quiz, Type)':
         Navigator.push(
@@ -271,6 +269,43 @@ class _CourseDetailState extends State<CourseDetail> {
         .collection('vocabularies')
         .get();
     return vocabularySnapshot.docs;
+  }
+  Future<void> navigateToSummarize(BuildContext context) async {
+  final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+      .collection('users')
+      .doc(widget.userId)
+      .collection('courses')
+      .doc(widget.courseId)
+      .collection('vocabularies')
+      .get();
+
+  int learnedCount = 0;
+  int studyingCount = 0;
+  querySnapshot.docs.forEach((doc) {
+  if ((doc.data() as Map<String, dynamic>)['status'] == 'Đã biết') {
+    learnedCount++;
+  }else if ((doc.data() as Map<String, dynamic>)['status'] == 'Đang học') {
+    studyingCount++;
+  }
+});
+    // print("đã biết: $learnedCount");
+    // print("length: ${querySnapshot.docs.length}");
+    if (learnedCount == querySnapshot.docs.length) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => SummarizeMemoryCard(
+                studyingCount: studyingCount,
+                learnedCount: learnedCount,
+                courseId: widget.courseId,
+                userId: widget.userId)),
+      );
+    }else if(learnedCount < querySnapshot.docs.length){
+      Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MemoryCardScreen(userId: widget.userId, courseId: widget.courseId)),
+        );
+    }
   }
 
 }
