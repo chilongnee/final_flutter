@@ -250,6 +250,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                       ),
                     ),
                   ),
+                  ElevatedButton(onPressed: () => add(context), child: Text('asdas'))
                 ],
               ),
             ),
@@ -257,5 +258,9 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
         ),
       ),
     );
+  }
+  void add(BuildContext context){
+    print(context);
+    
   }
 }

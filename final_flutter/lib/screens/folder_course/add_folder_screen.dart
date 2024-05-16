@@ -1,11 +1,17 @@
+
 import 'package:flutter/material.dart';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class AddFolderScreen extends StatelessWidget {
+class AddFolderScreen extends StatefulWidget {
   const AddFolderScreen({super.key});
 
+  @override
+  State<AddFolderScreen> createState() => _AddFolderScreenState();
+}
+
+class _AddFolderScreenState extends State<AddFolderScreen> {
   @override
   Widget build(BuildContext context) {
     TextEditingController titleController = TextEditingController();
@@ -79,7 +85,7 @@ class AddFolderScreen extends StatelessWidget {
         Navigator.pop(context);
       }
     }
-
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Folder'),
@@ -108,9 +114,18 @@ class AddFolderScreen extends StatelessWidget {
               onPressed: addFolder,
               child: const Text('Thêm Thư Mục'),
             ),
+            ElevatedButton(
+              onPressed: () => add(context),
+              child: const Text('Thêm Thư Mục'),
+            ),
           ],
         ),
       ),
     );
+  }
+
+  void add(BuildContext context){
+    print(context);
+    
   }
 }

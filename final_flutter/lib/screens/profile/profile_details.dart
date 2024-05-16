@@ -93,7 +93,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
     }
   }
 
-  void _showCountryBottomSheet(BuildContext context) async {
+  void _showGenderBottomSheet(BuildContext context) async {
     final selectedGender = await showModalBottomSheet<String>(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -330,7 +330,7 @@ class _ProfileDetailsState extends State<ProfileDetails> {
                           Padding(
                             padding: const EdgeInsets.only(right: 24, left: 24),
                             child: GestureDetector(
-                              onTap: () => _showCountryBottomSheet(context),
+                              onTap: () => _showGenderBottomSheet(context),
                               child: AbsorbPointer(
                                 child: TextFormField(
                                   controller: _genderController,

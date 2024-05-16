@@ -44,7 +44,7 @@ dependencies:
 
   flutter_card_swiper: ^7.0.1
   percent_indicator: ^4.2.3
-  
+  toggle_switch: ^2.3.0
   firebase_core: ^2.27.0
   flutter_social_button: ^1.1.4
   image_picker: ^1.0.7
