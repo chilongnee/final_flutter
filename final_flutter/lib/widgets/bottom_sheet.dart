@@ -42,7 +42,7 @@ class BottomSheetWidget extends StatelessWidget {
               return Container(
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFBBEDF2),
+                  color: Colors.teal.shade200,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: MaterialButton(

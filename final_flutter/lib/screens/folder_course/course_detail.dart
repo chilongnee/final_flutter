@@ -2,6 +2,7 @@ import 'package:final_flutter/screens/folder_course/memory_card.dart';
 import 'package:final_flutter/screens/folder_course/summarize_memory_card.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
 class CourseDetail extends StatefulWidget {
@@ -21,6 +22,7 @@ class CourseDetail extends StatefulWidget {
 class _CourseDetailState extends State<CourseDetail> {
   late Future<DocumentSnapshot> _courseFuture;
   late FlutterTts flutterTts = FlutterTts();
+  late Map<String, bool> _isClickedMap; // Track star status for each vocabulary
 
   @override
   void initState() {
@@ -60,7 +62,7 @@ class _CourseDetailState extends State<CourseDetail> {
       body: Container(
         width: screenSize.width,
         height: screenSize.height,
-        color: const Color(0xFFBBEDF2),
+        color: Colors.teal.shade200,
         child: FutureBuilder(
           future: _courseFuture,
           builder:
@@ -202,6 +204,11 @@ class _CourseDetailState extends State<CourseDetail> {
             return const Text('Error');
           } else {
             final List<DocumentSnapshot> vocabularies = snapshot.data!;
+            _isClickedMap = Map.fromIterable(
+              vocabularies,
+              key: (vocab) => vocab.id,
+              value: (vocab) => vocab['star'] ?? false,
+            );
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -215,8 +222,9 @@ class _CourseDetailState extends State<CourseDetail> {
                     final List<dynamic> types = vocabulary['types'];
                     final String vocabularyName = vocabulary['term'];
                     final String vocabularyMeaning = vocabulary['definition'];
-                    return _buildBoxForVocabulary(
-                        vocabularyName, vocabularyMeaning, types);
+                    final String vocabId = vocabulary.id;
+                    final bool isStar = vocabulary['star'] ?? false;
+                    return _buildBoxForVocabulary(vocabularyName, vocabularyMeaning, types, vocabId, isStar);
                   }).toList(),
                 ),
               ],
@@ -227,8 +235,8 @@ class _CourseDetailState extends State<CourseDetail> {
     );
   }
 
-  Widget _buildBoxForVocabulary(
-      String vocabularyName, String vocabularyMeaning, List<dynamic> types) {
+  Widget _buildBoxForVocabulary(String vocabularyName, String vocabularyMeaning, List<dynamic> types, String vocabId, bool isStar) {
+    var screenSize = MediaQuery.of(context).size;
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.symmetric(vertical: 8.0),
@@ -247,8 +255,7 @@ class _CourseDetailState extends State<CourseDetail> {
               children: [
                 Text(
                   vocabularyName,
-                  style: const TextStyle(
-                      fontSize: 16.0, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8.0),
                 Text(
@@ -259,18 +266,27 @@ class _CourseDetailState extends State<CourseDetail> {
                 Wrap(
                   spacing: 8.0,
                   runSpacing: 4.0,
-                  children: types
-                      .map((type) => Chip(
-                            label: Text(
-                              type.toString(),
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            backgroundColor: Colors.blue,
-                          ))
-                      .toList(),
+                  children: types.map((type) => Chip(
+                    label: Text(
+                      type.toString(),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                    backgroundColor: Colors.blue,
+                  )).toList(),
                 ),
               ],
             ),
+          ),
+          IconButton(
+            onPressed: () {
+              setState(() {
+                _isClickedMap[vocabId] = !_isClickedMap[vocabId]!;
+                _saveVocabStar(_isClickedMap[vocabId]!, vocabId);
+              });
+            },
+            icon: isStar ? Icon(Icons.star_outlined) : Icon(Icons.star_border_outlined),
+            iconSize: screenSize.width * 0.05,
+            color: isStar ? Colors.amber : Colors.grey,
           ),
           IconButton(
             icon: const Icon(Icons.volume_up),
@@ -299,6 +315,17 @@ class _CourseDetailState extends State<CourseDetail> {
     return vocabularySnapshot.docs;
   }
 
+  Future<void> _saveVocabStar(bool isStar, String vocabId) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('courses')
+        .doc(widget.courseId)
+        .collection('vocabularies')
+        .doc(vocabId)
+        .update({'star': isStar});
+  }
+
   Future<void> navigateToSummarize(BuildContext context) async {
     final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('users')
@@ -317,8 +344,7 @@ class _CourseDetailState extends State<CourseDetail> {
         studyingCount++;
       }
     }
-    // print("đã biết: $learnedCount");
-    // print("length: ${querySnapshot.docs.length}");
+
     if (learnedCount == querySnapshot.docs.length) {
       Navigator.pushReplacement(
         context,

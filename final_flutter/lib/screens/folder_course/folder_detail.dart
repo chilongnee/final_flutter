@@ -56,7 +56,7 @@ class _FolderDetailState extends State<FolderDetail> {
       body: Container(
         width: screenSize.width,
         height: screenSize.height,
-        color: const Color(0xFFBBEDF2),
+        color: Colors.teal.shade200,
         child: FutureBuilder(
           future: _folderFuture,
           builder:

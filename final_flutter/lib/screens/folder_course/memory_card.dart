@@ -165,7 +165,7 @@ class _MemoryCardScreenState extends State<MemoryCardScreen> {
                   ),
                   Container(
                     width: screenSize.width * 0.15,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                         borderRadius: BorderRadius.only(
                             topRight: Radius.circular(10),
                             bottomRight: Radius.circular(10)),

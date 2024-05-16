@@ -61,7 +61,7 @@ class _FolderState extends State<Folder> {
           ),
         ),
         body: Container(
-          color: const Color(0xFFBBEDF2),
+          color: Colors.teal.shade200,
           child: TabBarView(
             children: [
               _buildCourseTab(screenWidth),

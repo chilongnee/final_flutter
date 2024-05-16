@@ -6,6 +6,7 @@ import 'package:final_flutter/screens/login/firebase_auth_service.dart';
 import 'package:final_flutter/screens/login/login_screen.dart';
 import 'package:final_flutter/screens/profile/profile_Controller.dart';
 import 'package:final_flutter/screens/profile/profile_details.dart';
+import 'package:final_flutter/screens/profile/star_list_view.dart';
 import 'package:final_flutter/widgets/utils.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -304,7 +305,56 @@ Future<void> loadImage() async {
                           ),
                         ),
                       ),
-                      SizedBox(height: screenSize.height * 0.2),
+                      Padding(
+                        padding: const EdgeInsets.only( left: 15, right: 15, bottom: 25),
+                        child: GestureDetector (
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => StarListView(userId: userData.id?? '')),
+                            );
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white, // Màu nền là trắng
+                              borderRadius:
+                                  BorderRadius.circular(12), // Bo viền container
+                              border: Border.all(
+                                // Thiết lập border cho container
+                                color: Colors.teal, // Màu border là teal
+                                width: 2, // Độ dày của border
+                              ),
+                            ),
+                            alignment: Alignment.topLeft,
+                            child: const Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      top: 10.0, bottom: 10, left: 20),
+                                  child: Text(
+                                      'Xem các từ vựng đã note',
+                                      style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 32.0,right: 32),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      
+                                    ],
+                                  ),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: screenSize.height * 0.05),
                       ElevatedButton(
                         onPressed: () => _logOut(),
                         style: ElevatedButton.styleFrom(

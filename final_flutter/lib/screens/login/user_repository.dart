@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:final_flutter/models/user.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
@@ -73,6 +74,38 @@ class UserRepository extends GetxController{
     return null;
   }
 }
+
+Future<Map<String, String>> getUserAndCourse() async {
+  Map<String, String> userData = {};
+
+  final User? user = FirebaseAuth.instance.currentUser;
+
+  if (user != null) {
+    final QuerySnapshot snapshot = await FirebaseFirestore.instance
+        .collection("users")
+        .where("id", isEqualTo: user.uid)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      final userDataFromFirestore = snapshot.docs.first.data() as Map<String, dynamic>;
+
+      // Lấy userID và courseID từ dữ liệu
+      final String userId = user.uid;
+      final String? courseId = userDataFromFirestore['courseId'];
+
+
+      userData['userId'] = userId;
+      userData['courseId'] = courseId ?? "";
+
+      return userData;
+    }
+  }
+
+  // Trả về map rỗng nếu không có dữ liệu
+  return userData;
+}
+
+
 
 Future<void> updateUserData(String id, String updatedUsername, String updatedEmail, String updatedBirthDay, String updatedGender) async {
   try {

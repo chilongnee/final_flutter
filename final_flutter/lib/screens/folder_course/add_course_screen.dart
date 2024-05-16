@@ -102,6 +102,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
             DocumentReference vocabRef = await courseRef
               .collection('vocabularies')
               .add({
+                'star': false,
                 'status': 'Đang học',
                 'term': termController.text,
                 'definition': definitionController.text,
@@ -131,14 +132,14 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
           ),
         ],
       ),
-      backgroundColor: const Color(0xFFBBEDF2),
+      backgroundColor: Colors.teal.shade200,
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context).requestFocus(FocusNode());
         },
         child: SingleChildScrollView(
           child: Container(
-            color: const Color(0xFFBBEDF2),
+            color: Colors.teal.shade200,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(

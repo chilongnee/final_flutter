@@ -17,7 +17,7 @@ class _DashBoardState extends State<DashBoard> {
       ),
       
       body: Container(
-        color: const Color(0xFFBBEDF2),
+        color: Colors.teal.shade200,
         child: const Center(
           child: Text('DashBoard Screen', style: TextStyle(fontSize: 40)),
         ),

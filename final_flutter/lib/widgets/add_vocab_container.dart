@@ -70,7 +70,7 @@ class _AddVocabContainerState extends State<AddVocabContainer> {
                               borderRadius: BorderRadius.circular(5),
                             ),
                             minimumSize: const Size(20, 20),
-                            backgroundColor: const Color(0xFFBBEDF2),
+                            backgroundColor: Colors.teal.shade200,
                           ),
                           child: Container(
                             padding: const EdgeInsets.all(2),
