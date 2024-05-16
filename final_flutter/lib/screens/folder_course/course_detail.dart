@@ -2,6 +2,7 @@ import 'package:final_flutter/screens/folder_course/memory_card.dart';
 import 'package:final_flutter/screens/folder_course/summarize_memory_card.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class CourseDetail extends StatefulWidget {
   final String userId;
@@ -19,6 +20,7 @@ class CourseDetail extends StatefulWidget {
 
 class _CourseDetailState extends State<CourseDetail> {
   late Future<DocumentSnapshot> _courseFuture;
+  late FlutterTts flutterTts = FlutterTts();
 
   @override
   void initState() {
@@ -113,10 +115,10 @@ class _CourseDetailState extends State<CourseDetail> {
                       ),
                     ),
                     const SizedBox(height: 16.0),
-                    _buildBox(context,'Thẻ ghi nhớ'),
-                    _buildBox(context,'Học (Quiz, Type)'),
+                    _buildBox(context, 'Thẻ ghi nhớ'),
+                    _buildBox(context, 'Học (Quiz, Type)'),
                     _buildBox(context, 'Kiểm tra'),
-                    _buildBox(context,'Xếp hạng'),
+                    _buildBox(context, 'Xếp hạng'),
                     const SizedBox(height: 16.0),
                     _buildBoxForVocabularies(),
                   ],
@@ -160,19 +162,25 @@ class _CourseDetailState extends State<CourseDetail> {
       case 'Học (Quiz, Type)':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MemoryCardScreen(userId: widget.userId, courseId: widget.courseId)),
+          MaterialPageRoute(
+              builder: (context) => MemoryCardScreen(
+                  userId: widget.userId, courseId: widget.courseId)),
         );
         break;
       case 'Kiểm tra':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MemoryCardScreen(userId: widget.userId, courseId: widget.courseId)),
+          MaterialPageRoute(
+              builder: (context) => MemoryCardScreen(
+                  userId: widget.userId, courseId: widget.courseId)),
         );
         break;
       case 'Xếp hạng':
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MemoryCardScreen(userId: widget.userId, courseId: widget.courseId)),
+          MaterialPageRoute(
+              builder: (context) => MemoryCardScreen(
+                  userId: widget.userId, courseId: widget.courseId)),
         );
         break;
       default:
@@ -205,8 +213,8 @@ class _CourseDetailState extends State<CourseDetail> {
                 Column(
                   children: vocabularies.map((DocumentSnapshot vocabulary) {
                     final List<dynamic> types = vocabulary['types'];
-                    final String vocabularyName = vocabulary['definition'];
-                    final String vocabularyMeaning = vocabulary['term'];
+                    final String vocabularyName = vocabulary['term'];
+                    final String vocabularyMeaning = vocabulary['definition'];
                     return _buildBoxForVocabulary(
                         vocabularyName, vocabularyMeaning, types);
                   }).toList(),
@@ -229,35 +237,55 @@ class _CourseDetailState extends State<CourseDetail> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(10.0),
       ),
-      child: Column(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            vocabularyName,
-            style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  vocabularyName,
+                  style: const TextStyle(
+                      fontSize: 16.0, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8.0),
+                Text(
+                  vocabularyMeaning,
+                  style: const TextStyle(fontSize: 14.0),
+                ),
+                const SizedBox(height: 8.0),
+                Wrap(
+                  spacing: 8.0,
+                  runSpacing: 4.0,
+                  children: types
+                      .map((type) => Chip(
+                            label: Text(
+                              type.toString(),
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            backgroundColor: Colors.blue,
+                          ))
+                      .toList(),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 8.0),
-          Text(
-            vocabularyMeaning,
-            style: const TextStyle(fontSize: 14.0),
-          ),
-          const SizedBox(height: 8.0),
-          Wrap(
-            spacing: 8.0,
-            runSpacing: 4.0,
-            children: types
-                .map((type) => Chip(
-                      label: Text(
-                        type.toString(),
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                      backgroundColor: Colors.blue,
-                    ))
-                .toList(),
+          IconButton(
+            icon: const Icon(Icons.volume_up),
+            onPressed: () {
+              _speak(vocabularyName);
+            },
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _speak(String text) async {
+    await flutterTts.setLanguage("en-US");
+    await flutterTts.speak(text);
   }
 
   Future<List<DocumentSnapshot>> _fetchVocabularies() async {
@@ -270,24 +298,25 @@ class _CourseDetailState extends State<CourseDetail> {
         .get();
     return vocabularySnapshot.docs;
   }
-  Future<void> navigateToSummarize(BuildContext context) async {
-  final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
-      .collection('users')
-      .doc(widget.userId)
-      .collection('courses')
-      .doc(widget.courseId)
-      .collection('vocabularies')
-      .get();
 
-  int learnedCount = 0;
-  int studyingCount = 0;
-  querySnapshot.docs.forEach((doc) {
-  if ((doc.data() as Map<String, dynamic>)['status'] == 'Đã biết') {
-    learnedCount++;
-  }else if ((doc.data() as Map<String, dynamic>)['status'] == 'Đang học') {
-    studyingCount++;
-  }
-});
+  Future<void> navigateToSummarize(BuildContext context) async {
+    final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('courses')
+        .doc(widget.courseId)
+        .collection('vocabularies')
+        .get();
+
+    int learnedCount = 0;
+    int studyingCount = 0;
+    for (var doc in querySnapshot.docs) {
+      if ((doc.data() as Map<String, dynamic>)['status'] == 'Đã biết') {
+        learnedCount++;
+      } else if ((doc.data() as Map<String, dynamic>)['status'] == 'Đang học') {
+        studyingCount++;
+      }
+    }
     // print("đã biết: $learnedCount");
     // print("length: ${querySnapshot.docs.length}");
     if (learnedCount == querySnapshot.docs.length) {
@@ -300,12 +329,13 @@ class _CourseDetailState extends State<CourseDetail> {
                 courseId: widget.courseId,
                 userId: widget.userId)),
       );
-    }else if(learnedCount < querySnapshot.docs.length){
+    } else if (learnedCount < querySnapshot.docs.length) {
       Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => MemoryCardScreen(userId: widget.userId, courseId: widget.courseId)),
-        );
+        context,
+        MaterialPageRoute(
+            builder: (context) => MemoryCardScreen(
+                userId: widget.userId, courseId: widget.courseId)),
+      );
     }
   }
-
 }
