@@ -1,5 +1,6 @@
 import 'package:final_flutter/screens/folder_course/memory_card.dart';
 import 'package:final_flutter/screens/folder_course/summarize_memory_card.dart';
+import 'package:final_flutter/screens/folder_course/test_course.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
@@ -173,8 +174,8 @@ class _CourseDetailState extends State<CourseDetail> {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => MemoryCardScreen(
-                  userId: widget.userId, courseId: widget.courseId)),
+              builder: (context) =>
+                  TestCourse(userId: widget.userId, courseId: widget.courseId)),
         );
         break;
       case 'Xếp hạng':
@@ -224,7 +225,8 @@ class _CourseDetailState extends State<CourseDetail> {
                     final String vocabularyMeaning = vocabulary['definition'];
                     final String vocabId = vocabulary.id;
                     final bool isStar = vocabulary['star'] ?? false;
-                    return _buildBoxForVocabulary(vocabularyName, vocabularyMeaning, types, vocabId, isStar);
+                    return _buildBoxForVocabulary(vocabularyName,
+                        vocabularyMeaning, types, vocabId, isStar);
                   }).toList(),
                 ),
               ],
@@ -235,7 +237,8 @@ class _CourseDetailState extends State<CourseDetail> {
     );
   }
 
-  Widget _buildBoxForVocabulary(String vocabularyName, String vocabularyMeaning, List<dynamic> types, String vocabId, bool isStar) {
+  Widget _buildBoxForVocabulary(String vocabularyName, String vocabularyMeaning,
+      List<dynamic> types, String vocabId, bool isStar) {
     var screenSize = MediaQuery.of(context).size;
     return Container(
       width: double.infinity,
@@ -255,7 +258,8 @@ class _CourseDetailState extends State<CourseDetail> {
               children: [
                 Text(
                   vocabularyName,
-                  style: const TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                      fontSize: 16.0, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8.0),
                 Text(
@@ -266,13 +270,15 @@ class _CourseDetailState extends State<CourseDetail> {
                 Wrap(
                   spacing: 8.0,
                   runSpacing: 4.0,
-                  children: types.map((type) => Chip(
-                    label: Text(
-                      type.toString(),
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                    backgroundColor: Colors.blue,
-                  )).toList(),
+                  children: types
+                      .map((type) => Chip(
+                            label: Text(
+                              type.toString(),
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            backgroundColor: Colors.blue,
+                          ))
+                      .toList(),
                 ),
               ],
             ),
@@ -284,7 +290,9 @@ class _CourseDetailState extends State<CourseDetail> {
                 _saveVocabStar(_isClickedMap[vocabId]!, vocabId);
               });
             },
-            icon: isStar ? Icon(Icons.star_outlined) : Icon(Icons.star_border_outlined),
+            icon: isStar
+                ? Icon(Icons.star_outlined)
+                : Icon(Icons.star_border_outlined),
             iconSize: screenSize.width * 0.05,
             color: isStar ? Colors.amber : Colors.grey,
           ),
