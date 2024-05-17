@@ -193,49 +193,113 @@ class _CourseDetailState extends State<CourseDetail> {
   }
 
   Widget _buildBoxForVocabularies() {
-    return SizedBox(
-      width: MediaQuery.of(context).size.width,
-      child: FutureBuilder(
-        future: _fetchVocabularies(),
-        builder: (BuildContext context,
-            AsyncSnapshot<List<DocumentSnapshot>> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          } else if (snapshot.hasError) {
-            return const Text('Error');
-          } else {
-            final List<DocumentSnapshot> vocabularies = snapshot.data!;
-            _isClickedMap = Map.fromIterable(
-              vocabularies,
-              key: (vocab) => vocab.id,
-              value: (vocab) => vocab['star'] ?? false,
-            );
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Các từ vựng:',
-                  style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8.0),
-                Column(
-                  children: vocabularies.map((DocumentSnapshot vocabulary) {
-                    final List<dynamic> types = vocabulary['types'];
-                    final String vocabularyName = vocabulary['term'];
-                    final String vocabularyMeaning = vocabulary['definition'];
-                    final String vocabId = vocabulary.id;
-                    final bool isStar = vocabulary['star'] ?? false;
-                    return _buildBoxForVocabulary(vocabularyName,
-                        vocabularyMeaning, types, vocabId, isStar);
-                  }).toList(),
-                ),
-              ],
-            );
-          }
-        },
-      ),
-    );
-  }
+  return SizedBox(
+    width: MediaQuery.of(context).size.width,
+    child: StreamBuilder(
+      stream: _fetchVocabularies(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const CircularProgressIndicator();
+        } else if (snapshot.hasError) {
+          return const Text('Error');
+        } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+          return const Text('No vocabularies found');
+        } else {
+          final List<DocumentSnapshot> vocabularies = snapshot.data!.docs;
+          final List<DocumentSnapshot> studyingVocabularies = vocabularies
+              .where((vocabulary) => vocabulary['status'] == 'Đang học')
+              .toList();
+          final List<DocumentSnapshot> learnedVocabularies = vocabularies
+              .where((vocabulary) => vocabulary['status'] == 'Đã biết')
+              .toList();
+          
+          _isClickedMap = Map.fromIterable(
+            vocabularies,
+            key: (vocab) => vocab.id,
+            value: (vocab) => vocab['star'] ?? false,
+          );
+          
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Thuật ngữ trong học phần này (${vocabularies.length})',
+                style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold),
+              ),
+              studyingVocabularies.isNotEmpty
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Đang học (${studyingVocabularies.length})',
+                          style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromRGBO(255, 152, 58, 1)),
+                        ),
+                        Text(
+                          'Bạn đã bắt đầu học những thuật ngữ này. Tiếp tục phát huy nhé!',
+                          style: TextStyle(
+                              fontSize: 13.0, fontStyle: FontStyle.italic),
+                        ),
+                        const SizedBox(height: 8.0),
+                        Column(
+                          children: studyingVocabularies
+                              .map((DocumentSnapshot vocabulary) {
+                            final List<dynamic> types = vocabulary['types'];
+                            final String vocabularyName = vocabulary['term'];
+                            final String vocabularyMeaning =
+                                vocabulary['definition'];
+                            final String vocabId = vocabulary.id;
+                            final bool isStar = vocabulary['star'] ?? false;
+                            return _buildBoxForVocabulary(vocabularyName,
+                                vocabularyMeaning, types, vocabId, isStar);
+                          }).toList(),
+                        ),
+                      ],
+                    )
+                  : SizedBox(),
+              learnedVocabularies.isNotEmpty
+                  ? Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Thành thạo (${learnedVocabularies.length})',
+                          style: TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green),
+                        ),
+                        Text(
+                          'Bạn đã trả lời đúng các thuật ngữ này!',
+                          style: TextStyle(
+                              fontSize: 13.0, fontStyle: FontStyle.italic),
+                        ),
+                        const SizedBox(height: 8.0),
+                        Column(
+                          children: learnedVocabularies
+                              .map((DocumentSnapshot vocabulary) {
+                            final List<dynamic> types = vocabulary['types'];
+                            final String vocabularyName = vocabulary['term'];
+                            final String vocabularyMeaning =
+                                vocabulary['definition'];
+                            final String vocabId = vocabulary.id;
+                            final bool isStar = vocabulary['star'] ?? false;
+                            return _buildBoxForVocabulary(vocabularyName,
+                                vocabularyMeaning, types, vocabId, isStar);
+                          }).toList(),
+                        ),
+                      ],
+                    )
+                  : SizedBox(),
+            ],
+          );
+        }
+      },
+    ),
+  );
+}
+
 
   Widget _buildBoxForVocabulary(String vocabularyName, String vocabularyMeaning,
       List<dynamic> types, String vocabId, bool isStar) {
@@ -293,7 +357,7 @@ class _CourseDetailState extends State<CourseDetail> {
             icon: isStar
                 ? Icon(Icons.star_outlined)
                 : Icon(Icons.star_border_outlined),
-            iconSize: screenSize.width * 0.05,
+            iconSize: screenSize.width * 0.05 ,
             color: isStar ? Colors.amber : Colors.grey,
           ),
           IconButton(
@@ -307,21 +371,22 @@ class _CourseDetailState extends State<CourseDetail> {
     );
   }
 
+
   Future<void> _speak(String text) async {
     await flutterTts.setLanguage("en-US");
     await flutterTts.speak(text);
   }
 
-  Future<List<DocumentSnapshot>> _fetchVocabularies() async {
-    final QuerySnapshot vocabularySnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.userId)
-        .collection('courses')
-        .doc(widget.courseId)
-        .collection('vocabularies')
-        .get();
-    return vocabularySnapshot.docs;
-  }
+  Stream<QuerySnapshot> _fetchVocabularies() {
+  return FirebaseFirestore.instance
+      .collection('users')
+      .doc(widget.userId)
+      .collection('courses')
+      .doc(widget.courseId)
+      .collection('vocabularies')
+      .snapshots();
+}
+
 
   Future<void> _saveVocabStar(bool isStar, String vocabId) async {
     await FirebaseFirestore.instance

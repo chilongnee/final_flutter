@@ -218,7 +218,10 @@ class _MemoryCardScreenState extends State<MemoryCardScreen> {
                       ),
                     );
                   }
-                  if (direction == CardSwiperDirection.left) {
+                  if (direction == CardSwiperDirection.left 
+                  || direction == CardSwiperDirection.top && direction == CardSwiperDirection.left 
+                  || direction == CardSwiperDirection.top 
+                  || direction == CardSwiperDirection.bottom && direction == CardSwiperDirection.left) {
                     setState(() {
                       studyingCount += 1;
                     });
@@ -226,7 +229,10 @@ class _MemoryCardScreenState extends State<MemoryCardScreen> {
                     final currentDocId = vocabularies[prevIndex ?? 1].id;
                     _saveVocabStatus(_isStudied, currentDocId);
                   }
-                  if (direction == CardSwiperDirection.right) {
+                  if (direction == CardSwiperDirection.right 
+                  || direction == CardSwiperDirection.top && direction == CardSwiperDirection.right
+                  || direction == CardSwiperDirection.bottom
+                  || direction == CardSwiperDirection.bottom && direction == CardSwiperDirection.right ) {
                     print("preS: $_previousIndex");
                     print("currentS: $_currentIndex");
                     setState(() {
