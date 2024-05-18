@@ -11,10 +11,10 @@ class TestCourse extends StatefulWidget {
   final String userId;
 
   const TestCourse({
-    Key? key,
+    super.key,
     required this.userId,
     required this.courseId,
-  }) : super(key: key);
+  });
 
   @override
   _TestCourseState createState() => _TestCourseState();
@@ -30,7 +30,7 @@ class _TestCourseState extends State<TestCourse> {
   int _previousIndex = 1;
   int studyingCount = 0;
   int learnedCount = 0;
-  CardSwiperController _swiperController = CardSwiperController();
+  final CardSwiperController _swiperController = CardSwiperController();
   bool isBack = true;
   double angle = 0;
   @override
@@ -80,8 +80,8 @@ class _TestCourseState extends State<TestCourse> {
                   final totalVocabularies = snapshot.data!.docs.length;
 
                   return Text(
-                    '${_currentIndex}/$totalVocabularies',
-                    style: TextStyle(fontSize: 16.0, color: Colors.black),
+                    '$_currentIndex/$totalVocabularies',
+                    style: const TextStyle(fontSize: 16.0, color: Colors.black),
                   );
                 }
               },
@@ -128,11 +128,11 @@ class _TestCourseState extends State<TestCourse> {
                   Container(
                     width: screenSize.width * 0.15,
                     decoration: BoxDecoration(
-                        borderRadius: BorderRadius.only(
+                        borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(10),
                             bottomLeft: Radius.circular(10)),
                         color: Colors.orangeAccent.shade200,
-                        border: Border(
+                        border: const Border(
                           top: BorderSide(width: 2.0, color: Colors.white),
                           bottom: BorderSide(width: 2.0, color: Colors.white),
                           left: BorderSide(width: 2.0, color: Colors.white),
@@ -140,7 +140,7 @@ class _TestCourseState extends State<TestCourse> {
                         )),
                     child: Text(
                       studyingCount.toString(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 25,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -150,7 +150,7 @@ class _TestCourseState extends State<TestCourse> {
                   ),
                   Container(
                     width: screenSize.width * 0.15,
-                    decoration: BoxDecoration(
+                    decoration: const BoxDecoration(
                         borderRadius: BorderRadius.only(
                             topRight: Radius.circular(10),
                             bottomRight: Radius.circular(10)),
@@ -163,7 +163,7 @@ class _TestCourseState extends State<TestCourse> {
                         )),
                     child: Text(
                       learnedCount.toString(),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 25,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
@@ -305,7 +305,7 @@ class _TestCourseState extends State<TestCourse> {
       onTap: _flip,
       child: TweenAnimationBuilder(
         tween: Tween<double>(begin: 0, end: angle),
-        duration: Duration(seconds: 1),
+        duration: const Duration(seconds: 1),
         builder: (BuildContext context, double val, __) {
           if (val >= (pi / 2) && val < (3 * pi / 2)) {
             isBack = false;
@@ -317,7 +317,7 @@ class _TestCourseState extends State<TestCourse> {
             transform: Matrix4.identity()
               ..setEntry(3, 2, 0.001)
               ..rotateY(isBack ? val : pi - val),
-            child: Container(
+            child: SizedBox(
               width: screenSize.width * 0.9,
               height: screenSize.height * 0.6,
               child: isBack
@@ -383,7 +383,7 @@ class _TestCourseState extends State<TestCourse> {
             Column(
               children: answers.map((answer) {
                 return ListTile(
-                  leading: Icon(Icons.check_circle_outline),
+                  leading: const Icon(Icons.check_circle_outline),
                   title: Text(answer),
                   onTap: () {
                     setState(() {

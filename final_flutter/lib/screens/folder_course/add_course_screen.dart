@@ -74,7 +74,33 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   Future<void> _saveCourseDataToFirestore(BuildContext context) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
+      if (_vocabContainers.length < 3) {
+        _showAlert(context, 'Phải tạo tối thiểu 3 vocab');
+        return;
+      }
+
+      bool allFieldsFilled = true;
+      for (var container in _vocabContainers) {
+        if (container is Column) {
+          Widget child = container.children.first;
+          if (child is AddVocabContainer) {
+            if (child.termController.text.isEmpty ||
+                child.definitionController.text.isEmpty) {
+              allFieldsFilled = false;
+              break;
+            }
+          }
+        }
+      }
+
+      if (!allFieldsFilled) {
+        _showAlert(context, 'Tất cả các trường phải được điền');
+        return;
+      }
+
       String userId = user.uid;
+      String username = user.displayName ?? 'Unknown';
+
       DocumentReference courseRef = FirebaseFirestore.instance
           .collection('users')
           .doc(userId)
@@ -84,6 +110,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       await courseRef.set({
         'title': titleController.text,
         'progress': selectedProgress,
+        'username': username,
       });
 
       for (var i = 0; i < _vocabContainers.length; i++) {
@@ -99,23 +126,39 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
             List<String> selectedTypes =
                 vocabContainer.selectedTypes?.value ?? [];
 
-            DocumentReference vocabRef = await courseRef
-              .collection('vocabularies')
-              .add({
-                'star': false,
-                'status': 'Đang học',
-                'term': termController.text,
-                'definition': definitionController.text,
-                'types': selectedTypes,
-              });
-              String vocabId = vocabRef.id;
-              await vocabRef.update({'id': vocabId});
+            DocumentReference vocabRef =
+                await courseRef.collection('vocabularies').add({
+              'star': false,
+              'status': 'Đang học',
+              'term': termController.text,
+              'definition': definitionController.text,
+              'types': selectedTypes,
+            });
+            String vocabId = vocabRef.id;
+            await vocabRef.update({'id': vocabId});
           }
         }
       }
 
       Navigator.pop(context);
     }
+  }
+
+  void _showAlert(BuildContext context, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Thông báo'),
+        content: Text(message),
+        contentPadding: const EdgeInsets.all(10),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -251,7 +294,8 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                       ),
                     ),
                   ),
-                  ElevatedButton(onPressed: () => add(context), child: Text('asdas'))
+                  ElevatedButton(
+                      onPressed: () => add(context), child: const Text('asdas'))
                 ],
               ),
             ),
@@ -260,8 +304,8 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       ),
     );
   }
-  void add(BuildContext context){
+
+  void add(BuildContext context) {
     print(context);
-    
   }
 }
