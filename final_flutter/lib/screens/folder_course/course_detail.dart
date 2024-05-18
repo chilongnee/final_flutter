@@ -1,6 +1,7 @@
 import 'package:final_flutter/screens/folder_course/memory_card.dart';
 import 'package:final_flutter/screens/folder_course/summarize_memory_card.dart';
-import 'package:final_flutter/screens/folder_course/test_course.dart';
+import 'package:final_flutter/screens/folder_course/quiz_test.dart';
+import 'package:final_flutter/screens/folder_course/type_test.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
@@ -119,8 +120,8 @@ class _CourseDetailState extends State<CourseDetail> {
                     ),
                     const SizedBox(height: 16.0),
                     _buildBox(context, 'Thẻ ghi nhớ'),
-                    _buildBox(context, 'Học (Quiz, Type)'),
-                    _buildBox(context, 'Kiểm tra'),
+                    _buildBox(context, 'Học (Type)'),
+                    _buildBox(context, 'Kiểm tra (Quiz)'),
                     _buildBox(context, 'Xếp hạng'),
                     const SizedBox(height: 16.0),
                     _buildBoxForVocabularies(),
@@ -162,15 +163,15 @@ class _CourseDetailState extends State<CourseDetail> {
       case 'Thẻ ghi nhớ':
         navigateToSummarize(context);
         break;
-      case 'Học (Quiz, Type)':
+      case 'Học (Type)':
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => MemoryCardScreen(
+              builder: (context) => TypeTest(
                   userId: widget.userId, courseId: widget.courseId)),
         );
         break;
-      case 'Kiểm tra':
+      case 'Kiểm tra (Quiz)':
         Navigator.push(
           context,
           MaterialPageRoute(

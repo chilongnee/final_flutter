@@ -39,7 +39,6 @@ class _QuizTestState extends State<QuizTest> {
   bool _isFalse3 = false;
   bool _isFalse4 = false;
   int resultOfTest = 0;
-  // Add these variables to store the current vocabulary and answers
   DocumentSnapshot? _currentVocabulary;
   List<String> _answers = [];
 
