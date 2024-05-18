@@ -1,13 +1,10 @@
 import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:final_flutter/home.dart';
 import 'package:final_flutter/screens/folder_course/sumarize_test.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:toggle_switch/toggle_switch.dart';
 
 class TypeTest extends StatefulWidget {
   final String courseId;
@@ -49,8 +46,7 @@ class _TypeTestState extends State<TypeTest> {
       appBar: AppBar(
         title: FutureBuilder(
           future: _course,
-          builder:
-              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const CircularProgressIndicator();
             } else if (snapshot.hasError) {
@@ -71,8 +67,7 @@ class _TypeTestState extends State<TypeTest> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: StreamBuilder<QuerySnapshot>(
               stream: _vocabulariesStream,
-              builder: (BuildContext context,
-                  AsyncSnapshot<QuerySnapshot> snapshot) {
+              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
                 } else if (snapshot.hasError) {
@@ -96,8 +91,7 @@ class _TypeTestState extends State<TypeTest> {
   Widget _buildQuizWidget(Size screenSize) {
     return FutureBuilder(
       future: _listVocab,
-      builder: (BuildContext context,
-          AsyncSnapshot<List<DocumentSnapshot>> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<List<DocumentSnapshot>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
@@ -111,10 +105,8 @@ class _TypeTestState extends State<TypeTest> {
             final String vocabularyMeaning = _currentVocabulary!['definition'];
             final List<dynamic> types = _currentVocabulary!['types'];
 
-            return _buildQuizLayout(
-                screenSize, vocabularyName, vocabularyMeaning, types);
+            return _buildQuizLayout(screenSize, vocabularyName, vocabularyMeaning, types);
           } else {
-            print(resultOfTest);
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.pushReplacement(
                 context,
@@ -136,8 +128,7 @@ class _TypeTestState extends State<TypeTest> {
     );
   }
 
-  Widget _buildQuizLayout(Size screenSize, String vocabularyName,
-      String vocabularyMeaning, List<dynamic> types) {
+  Widget _buildQuizLayout(Size screenSize, String vocabularyName, String vocabularyMeaning, List<dynamic> types) {
     return SingleChildScrollView(
       child: Container(
         height: screenSize.height,
@@ -156,9 +147,7 @@ class _TypeTestState extends State<TypeTest> {
               child: Column(
                 children: [
                   Container(
-                    margin: EdgeInsets.only(
-                        top: screenSize.width * 0.1,
-                        bottom: screenSize.width * 0.05),
+                    margin: EdgeInsets.only(top: screenSize.width * 0.1, bottom: screenSize.width * 0.05),
                     width: screenSize.width * 0.5,
                     height: screenSize.height * 0.3,
                     decoration: BoxDecoration(
@@ -200,23 +189,38 @@ class _TypeTestState extends State<TypeTest> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: TextField(
-                controller: _textEditingController,
-                onChanged: (value) {
-                  _userAnswer = value;
-                },
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Your Answer',
-                ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _textEditingController,
+                      onChanged: (value) {
+                        setState(() {
+                          _userAnswer = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'Your Answer',
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 8.0),
+                  _userAnswer.isEmpty
+                      ? TextButton(
+                          onPressed: () {
+                            _checkAnswer(vocabularyName, vocabularyMeaning);
+                          },
+                          child: Text('Không biết'),
+                        )
+                      : IconButton(
+                          onPressed: () {
+                            _checkAnswer(vocabularyName, vocabularyMeaning);
+                          },
+                          icon: Icon(Icons.check, color: Colors.green),
+                        ),
+                ],
               ),
-            ),
-            SizedBox(height: screenSize.height * 0.02),
-            ElevatedButton(
-              onPressed: () {
-                _checkAnswer(vocabularyMeaning);
-              },
-              child: Text('Submit'),
             ),
           ],
         ),
@@ -259,14 +263,66 @@ class _TypeTestState extends State<TypeTest> {
     await flutterTts.speak(text);
   }
 
-  void _checkAnswer(String correctAnswer) {
-    if (_userAnswer.trim().toLowerCase() ==
-        correctAnswer.trim().toLowerCase()) {
+  void _checkAnswer(String vocabularyName, String correctAnswer) {
+    bool isCorrect = _userAnswer.trim().toLowerCase() ==
+        correctAnswer.trim().toLowerCase();
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        var screenSize = MediaQuery.of(context).size;
+        return AlertDialog(
+          titlePadding: EdgeInsets.zero,
+          actionsPadding: EdgeInsets.zero,
+          title: Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15)),
+              color: isCorrect ? Colors.green : Colors.red,
+            ),
+            child: Text(
+              isCorrect ? 'Correct!' : 'Incorrect',
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+          ),
+          content: isCorrect
+              ? Text('$vocabularyName - $correctAnswer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),)
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('$vocabularyName - $correctAnswer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                    SizedBox(height: screenSize.height * 0.01),
+                    Text('Đáp án đúng:', style: TextStyle(fontSize: 15, color: Colors.green)),
+                    SizedBox(height: screenSize.height * 0.008),
+                    Text('$correctAnswer', style: TextStyle(fontSize: 15)),
+                    SizedBox(height: screenSize.height * 0.01),
+                    Text('Đáp án bạn chọn:', style: TextStyle(fontSize: 15, color: Colors.red)),
+                    SizedBox(height: screenSize.height * 0.008),
+                    Text('$_userAnswer', style: TextStyle(fontSize: 15)),
+                  ],
+                ),
+          actions: [
+            Center(
+              child: TextButton(
+                child: Text('Tiếp tục'),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  _delayAndNextQuestion();
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+    if (isCorrect) {
       setState(() {
         resultOfTest++;
       });
     }
-    _delayAndNextQuestion();
   }
 
   Future<void> _delayAndNextQuestion() async {

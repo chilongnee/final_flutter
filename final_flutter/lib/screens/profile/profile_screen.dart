@@ -52,12 +52,12 @@ class _ProfileState extends State<Profile> {
  final controller = Get.put(ProfileController());
 Future<void> loadImage() async {
   controller.getUserData().then((userDetails) async {
-      if (userDetails != null) {
+      if (mounted && userDetails != null) {
         // Lấy ảnh từ Firebase Storage
         if (userDetails.imageLink != null || userDetails.imageLink != "") {
           Uint8List? imageBytes =
               await controller.loadImageFromStorage(userDetails.imageLink!);
-          if (imageBytes != null) {
+          if (mounted &&imageBytes != null) {
             setState(() {
               _image = imageBytes;
             });

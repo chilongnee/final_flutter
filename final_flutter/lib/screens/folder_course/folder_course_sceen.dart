@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'folder_detail.dart';
 import 'course_detail.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -112,7 +114,25 @@ class _FolderState extends State<Folder> {
                           ),
                         );
                       },
-                      child: Container(
+                      child: Slidable(
+                                key: ValueKey(folder.id),
+                                endActionPane: ActionPane(
+                                    extentRatio: 0.3,
+                                    motion: BehindMotion(),
+                                    children: [
+                                        SlidableAction(
+                                          onPressed: (BuildContext context) => _deleteFolder(folder.id),
+                                          backgroundColor: Colors.red,
+                                          foregroundColor: Colors.white,
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
+                                          icon: Icons.delete,
+                                          padding: const EdgeInsets.all(16.0),
+                                          label: 'Delete',
+                                        
+                                      ),
+                                    ]),
+                                child:Container(
                         width: screenWidth,
                         margin:
                             const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
@@ -143,6 +163,7 @@ class _FolderState extends State<Folder> {
                               ),
                           ],
                         ),
+                      ),
                       ),
                     );
                   },
@@ -231,29 +252,51 @@ class _FolderState extends State<Folder> {
                                   ),
                                 );
                               },
-                              child: Container(
-                                width: screenWidth,
-                                margin: const EdgeInsets.fromLTRB(
-                                    20.0, 10.0, 20.0, 10.0),
-                                padding: const EdgeInsets.all(12.0),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(10.0),
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      course['title'],
-                                      style: const TextStyle(
-                                          fontSize: 18.0,
-                                          fontWeight: FontWeight.bold),
+                              child: Slidable(
+                                key: ValueKey(course.id),
+                                endActionPane: ActionPane(
+                                    extentRatio: 0.3,
+                                    motion: BehindMotion(),
+                                    children: [
+                                      SlidableAction(
+                                        
+                                        onPressed: (BuildContext context) => _deleteTopic(course.id),
+                                        backgroundColor: Colors.red,
+                                        foregroundColor: Colors.white,
+                                        borderRadius:
+                                            BorderRadius.circular(10.0),
+                                        icon: Icons.delete,
+                                        padding: const EdgeInsets.all(16.0),
+                                        label: 'Delete',
+                                      ),
+                                    ]
                                     ),
-                                    Text(
-                                      'Progress: ${course['progress']}',
-                                      style: const TextStyle(fontSize: 14.0),
-                                    ),
-                                  ],
+                                
+                                child: Container(
+                                  width: screenWidth,
+                                  margin: const EdgeInsets.fromLTRB(
+                                      20.0, 10.0, 20.0, 10.0),
+                                  padding: const EdgeInsets.all(12.0),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10.0),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        course['title'],
+                                        style: const TextStyle(
+                                            fontSize: 18.0,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        'Progress: ${course['progress']}',
+                                        style: const TextStyle(fontSize: 14.0),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             );
@@ -272,4 +315,56 @@ class _FolderState extends State<Folder> {
       },
     );
   }
+  
+  void _deleteTopic(String id) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('courses')
+        .doc(id)
+        .delete();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        backgroundColor: Colors.green,
+        content: Text('Chủ đề đã được xóa thành công'),
+      ),
+    );
+  } catch (e) {
+    // Xử lý lỗi nếu có
+    print('Lỗi khi xóa chủ đề: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        backgroundColor: Colors.red,
+        content: Text('Đã xảy ra lỗi khi xóa chủ đề'),
+      ),
+    );
+  }
+}
+void _deleteFolder(String id) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .collection('folders')
+        .doc(id)
+        .delete();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        backgroundColor: Colors.green,
+        content: Text('Thư mục đã được xóa thành công'),
+      ),
+    );
+  } catch (e) {
+    print('Lỗi khi xóa thư mục: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        backgroundColor: Colors.red,
+        content: Text('Đã xảy ra lỗi khi xóa thư mục'),
+      ),
+    );
+  }
+}
+
+
 }

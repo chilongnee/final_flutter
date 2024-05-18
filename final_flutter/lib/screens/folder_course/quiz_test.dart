@@ -141,7 +141,7 @@ class _QuizTestState extends State<QuizTest> {
               );
             });
 
-            return const Center(child: Text('No vocabulary available'));
+            return Container();
           }
         }
       },
@@ -285,7 +285,7 @@ class _QuizTestState extends State<QuizTest> {
               ],
             ),
           ),
-          if (answers.length > 2)
+          
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -322,6 +322,7 @@ class _QuizTestState extends State<QuizTest> {
                     ),
                   ),
                 ),
+                if (answers.length > 3)
                 GestureDetector(
                   onTap: () {
                     if (answers[3] == vocabularyMeaning) {

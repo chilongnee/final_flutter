@@ -1,11 +1,14 @@
 import 'package:final_flutter/screens/folder_course/memory_card.dart';
+import 'package:final_flutter/screens/folder_course/ranking_screen.dart';
 import 'package:final_flutter/screens/folder_course/summarize_memory_card.dart';
 import 'package:final_flutter/screens/folder_course/quiz_test.dart';
 import 'package:final_flutter/screens/folder_course/type_test.dart';
+import 'package:final_flutter/widgets/multiselect_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
 
 class CourseDetail extends StatefulWidget {
   final String userId;
@@ -60,6 +63,7 @@ class _CourseDetailState extends State<CourseDetail> {
             }
           },
         ),
+        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.settings))],
       ),
       body: Container(
         width: screenSize.width,
@@ -167,8 +171,8 @@ class _CourseDetailState extends State<CourseDetail> {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => TypeTest(
-                  userId: widget.userId, courseId: widget.courseId)),
+              builder: (context) =>
+                  TypeTest(userId: widget.userId, courseId: widget.courseId)),
         );
         break;
       case 'Kiểm tra (Quiz)':
@@ -183,7 +187,7 @@ class _CourseDetailState extends State<CourseDetail> {
         Navigator.push(
           context,
           MaterialPageRoute(
-              builder: (context) => MemoryCardScreen(
+              builder: (context) => RankingScreen(
                   userId: widget.userId, courseId: widget.courseId)),
         );
         break;
@@ -303,71 +307,234 @@ class _CourseDetailState extends State<CourseDetail> {
   Widget _buildBoxForVocabulary(String vocabularyName, String vocabularyMeaning,
       List<dynamic> types, String vocabId, bool isStar) {
     var screenSize = MediaQuery.of(context).size;
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.symmetric(vertical: 8.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  vocabularyName,
-                  style: const TextStyle(
-                      fontSize: 16.0, fontWeight: FontWeight.bold),
+    return Slidable(
+        key: ValueKey(vocabId),
+        endActionPane: ActionPane(motion: BehindMotion(), children: [
+          SlidableAction(
+            onPressed: (BuildContext context) => _deleteVocabulary(vocabId),
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+            borderRadius: BorderRadius.circular(10.0),
+            icon: Icons.delete,
+            padding: const EdgeInsets.all(16.0),
+            label: 'Delete',
+          ),
+          SlidableAction(
+            onPressed: (BuildContext context) => _onEditVocabulary(
+                vocabId, vocabularyName, vocabularyMeaning, types, isStar),
+            backgroundColor: Colors.grey,
+            foregroundColor: Colors.white,
+            borderRadius: BorderRadius.circular(10.0),
+            icon: Icons.edit,
+            label: 'Edit',
+          ),
+        ]),
+        child: Container(
+          width: double.infinity,
+          margin: const EdgeInsets.symmetric(vertical: 8.0),
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      vocabularyName,
+                      style: const TextStyle(
+                          fontSize: 16.0, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 8.0),
+                    Text(
+                      vocabularyMeaning,
+                      style: const TextStyle(fontSize: 14.0),
+                    ),
+                    const SizedBox(height: 8.0),
+                    Wrap(
+                      spacing: 8.0,
+                      runSpacing: 4.0,
+                      children: types
+                          .map((type) => Chip(
+                                label: Text(
+                                  type.toString(),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                                backgroundColor: Colors.blue,
+                              ))
+                          .toList(),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 8.0),
-                Text(
-                  vocabularyMeaning,
-                  style: const TextStyle(fontSize: 14.0),
-                ),
-                const SizedBox(height: 8.0),
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: 4.0,
-                  children: types
-                      .map((type) => Chip(
-                            label: Text(
-                              type.toString(),
-                              style: const TextStyle(color: Colors.white),
+              ),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    _isClickedMap[vocabId] = !_isClickedMap[vocabId]!;
+                    _saveVocabStar(_isClickedMap[vocabId]!, vocabId);
+                  });
+                },
+                icon: isStar
+                    ? const Icon(Icons.star_outlined)
+                    : const Icon(Icons.star_border_outlined),
+                iconSize: screenSize.width * 0.05,
+                color: isStar ? Colors.amber : Colors.grey,
+              ),
+              IconButton(
+                icon: const Icon(Icons.volume_up),
+                onPressed: () {
+                  _speak(vocabularyName);
+                },
+              ),
+            ],
+          ),
+        ));
+  }
+
+  void _onEditVocabulary(
+      String vocabId,
+      String currentVocabularyName,
+      String currentVocabularyMeaning,
+      List<dynamic> currentTypes,
+      bool isStar) {
+    String editedVocabularyName = currentVocabularyName;
+    String editedVocabularyMeaning = currentVocabularyMeaning;
+    List<dynamic> editedTypes = List.from(currentTypes);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text('Chỉnh sửa từ vựng'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    decoration: InputDecoration(labelText: 'Tên từ vựng'),
+                    onChanged: (newValue) {
+                      editedVocabularyName = newValue;
+                    },
+                    controller:
+                        TextEditingController(text: editedVocabularyName),
+                  ),
+                  TextField(
+                    decoration: InputDecoration(labelText: 'Ý nghĩa'),
+                    onChanged: (newValue) {
+                      editedVocabularyMeaning = newValue;
+                    },
+                    controller:
+                        TextEditingController(text: editedVocabularyMeaning),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Text(
+                            'Loại từ',
+                            style: TextStyle(
+                              fontSize: 12.0,
+                              color: Colors.black,
                             ),
-                            backgroundColor: Colors.blue,
-                          ))
-                      .toList(),
+                          ),
+                          const SizedBox(width: 20),
+                          ElevatedButton(
+                            onPressed: () =>
+                                _addTypeDialog(context, editedTypes, setState),
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(5),
+                              ),
+                              minimumSize: const Size(20, 20),
+                              backgroundColor: Colors.teal.shade200,
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.all(2),
+                              child: const Text(
+                                'Chọn',
+                                style:
+                                    TextStyle(fontSize: 8, color: Colors.black),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      Wrap(
+                        spacing: 8.0,
+                        children: editedTypes.map((type) {
+                          return Chip(
+                            label: Text(type.toString()),
+                            onDeleted: () {
+                              setState(() {
+                                editedTypes.remove(type);
+                              });
+                            },
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    _updateVocabulary(vocabId, editedVocabularyName,
+                        editedVocabularyMeaning, editedTypes, isStar);
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Lưu'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Hủy'),
                 ),
               ],
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              setState(() {
-                _isClickedMap[vocabId] = !_isClickedMap[vocabId]!;
-                _saveVocabStar(_isClickedMap[vocabId]!, vocabId);
-              });
-            },
-            icon: isStar
-                ? const Icon(Icons.star_outlined)
-                : const Icon(Icons.star_border_outlined),
-            iconSize: screenSize.width * 0.05,
-            color: isStar ? Colors.amber : Colors.grey,
-          ),
-          IconButton(
-            icon: const Icon(Icons.volume_up),
-            onPressed: () {
-              _speak(vocabularyName);
-            },
-          ),
-        ],
-      ),
+            );
+          },
+        );
+      },
     );
+  }
+
+  void _showMultiSelect(ValueNotifier<List<String>> selectedTypes) async {
+    final List<String> types = ['Noun', 'Adj', 'Verb', 'Adv'];
+
+    final dynamic results = await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return MultiSelectDialog(
+            options: types, selectedOptions: selectedTypes.value);
+      },
+    );
+
+    if (results != null && results is List<String>) {
+      selectedTypes.value = results;
+    }
+  }
+
+  void _addTypeDialog(
+      BuildContext context, List<dynamic> editedTypes, Function setState) {
+    final selectedTypes = ValueNotifier<List<String>>(
+        List.from(editedTypes.map((type) => type.toString())));
+
+    _showMultiSelect(selectedTypes);
+
+    selectedTypes.addListener(() {
+      setState(() {
+        editedTypes.clear();
+        editedTypes.addAll(selectedTypes.value);
+      });
+    });
   }
 
   Future<void> _speak(String text) async {
@@ -432,6 +599,62 @@ class _CourseDetailState extends State<CourseDetail> {
             builder: (context) => MemoryCardScreen(
                 userId: widget.userId, courseId: widget.courseId)),
       );
+    }
+  }
+
+  Future<void> _deleteVocabulary(String vocabId) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .collection('courses')
+          .doc(widget.courseId)
+          .collection('vocabularies')
+          .doc(vocabId)
+          .delete();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.green,
+        content: Text('Xóa từ vựng thành công'),
+      ));
+    } catch (e) {
+      print('Lỗi khi xóa từ vựng: $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.red,
+        content: Text('Đã xảy ra lỗi khi xóa từ vựng'),
+      ));
+    }
+  }
+
+  Future<void> _updateVocabulary(
+      String vocabId,
+      String editedVocabularyName,
+      String editedVocabularyMeaning,
+      List<dynamic> editedTypes,
+      bool isStar) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .collection('courses')
+          .doc(widget.courseId)
+          .collection('vocabularies')
+          .doc(vocabId)
+          .update({
+        'term': editedVocabularyName,
+        'definition': editedVocabularyMeaning,
+        'types': editedTypes,
+        'star': isStar,
+      });
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.green,
+        content: Text('Cập nhật từ vựng thành công'),
+      ));
+    } catch (e) {
+      print('Lỗi khi cập nhật từ vựng: $e');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        backgroundColor: Colors.red,
+        content: Text('Đã xảy ra lỗi khi cập nhật từ vựng'),
+      ));
     }
   }
 }

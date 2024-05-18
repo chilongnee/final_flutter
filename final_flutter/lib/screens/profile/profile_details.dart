@@ -54,10 +54,10 @@ class _ProfileDetailsState extends State<ProfileDetails> {
         _genderController.text = userDetails.gender ?? "";
         userID = userDetails.id ?? "";
         // Lấy ảnh từ Firebase Storage
-        if (userDetails.imageLink != null) {
+        if (mounted  && userDetails.imageLink != null) {
           Uint8List? imageBytes =
               await controller.loadImageFromStorage(userDetails.imageLink!);
-          if (imageBytes != null) {
+          if (mounted && imageBytes != null) {
             setState(() {
               _image = imageBytes;
             });

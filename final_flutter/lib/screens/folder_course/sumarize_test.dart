@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_flutter/home.dart';
+import 'package:final_flutter/screens/folder_course/course_detail.dart';
 import 'package:final_flutter/screens/folder_course/memory_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
@@ -107,12 +108,12 @@ class _SummarizeTestScreenState extends State<SummarizeTest> {
                       Padding(
                         padding: EdgeInsets.symmetric(
                           vertical: screenSize.height * 0.02,
-                          horizontal: screenSize.width * 0.09,
+                          horizontal: screenSize.width * 0.05,
                         ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             Expanded(
+                              flex: 2,
                               child: CircularPercentIndicator(
                                 animation: true,
                                 animationDuration: 1000,
@@ -133,71 +134,72 @@ class _SummarizeTestScreenState extends State<SummarizeTest> {
                                 ),
                               ),
                             ),
-                            SizedBox(width: screenSize.width * 0.1),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      'Số câu đúng:',
-                                      style: TextStyle(
+                            // SizedBox(width: screenSize.width * 0.15),
+                            Expanded(
+                              flex: 2,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Số câu đúng:',
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 20,
+                                            color: Colors.green
+                                            ),
+                                      ),
+                                      SizedBox(width: screenSize.width * 0.03),
+                                      CircularPercentIndicator(
+                                        radius: 20,
+                                        center: Text(
+                                          widget.result.toString(),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                          ),
+                                        ),
+                                        backgroundColor: Colors.green,
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(height: screenSize.height * 0.05),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        'Số câu sai:',
+                                        style: TextStyle(
                                           fontWeight: FontWeight.bold,
                                           fontSize: 20,
-                                          color: Colors.green),
-                                    ),
-                                    SizedBox(width: screenSize.width * 0.2),
-                                    CircularPercentIndicator(
-                                      radius: 20,
-                                      center: Text(
-                                        widget.result.toString(),
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15,
+                                          color: Colors.orangeAccent.shade200,
                                         ),
                                       ),
-                                      backgroundColor: Colors.green,
-                                    ),
-                                  ],
-                                ),
-                                SizedBox(height: screenSize.height * 0.05),
-                                Row(
-                                  children: [
-                                    Text(
-                                      'Số câu sai',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20,
-                                        color: Colors.orangeAccent.shade200,
-                                      ),
-                                    ),
-                                    SizedBox(width: screenSize.width * 0.15),
-                                    CircularPercentIndicator(
-                                      radius: 20,
-                                      center: Text(
-                                        (widget.totalVocab.length -
-                                                widget.result)
-                                            .toString(),
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 15,
+                                      SizedBox(width: screenSize.width * 0.085),
+                                      CircularPercentIndicator(
+                                        radius: 20,
+                                        center: Text(
+                                          (widget.totalVocab.length -
+                                                  widget.result)
+                                              .toString(),
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 15,
+                                          ),
                                         ),
+                                        backgroundColor:
+                                            Colors.orangeAccent.shade200,
                                       ),
-                                      backgroundColor:
-                                          Colors.orangeAccent.shade200,
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                    ],
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(height: screenSize.height * 0.075),
-                      Column(
-                        children: [
-                          if (2 > 0)
-                            SizedBox(
+                      SizedBox(height: screenSize.height * 0.18),
+                      SizedBox(
                               width: screenSize.width * 0.85,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
@@ -206,67 +208,18 @@ class _SummarizeTestScreenState extends State<SummarizeTest> {
                                   ),
                                 ),
                                 child: Text(
-                                  'Tiếp tục ôn 2 thuật ngữ',
+                                  'Quay lại học phần',
                                   style: TextStyle(
                                     color: Colors.teal.shade600,
                                     fontSize: 20,
                                   ),
                                 ),
                                 onPressed: () {
-                                  Navigator.pushReplacement(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => MemoryCardScreen(
-                                              userId: widget.userId,
-                                              courseId: widget.courseId,
-                                            )),
-                                  );
+                                  Navigator.pop(context);
+                                  Navigator.pop(context);
                                 },
                               ),
                             ),
-                          SizedBox(height: screenSize.height * 0.01),
-                          SizedBox(
-                            width: screenSize.width * 0.85,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              child: Text(
-                                'Ôn trong chế độ Học',
-                                style: TextStyle(
-                                  color: Colors.teal.shade600,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              onPressed: () {
-                              },
-                            ),
-                          ),
-                          SizedBox(height: screenSize.height * 0.01),
-                          SizedBox(
-                            width: screenSize.width * 0.85,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              child: Text(
-                                'Đặt lại thẻ ghi nhớ',
-                                style: TextStyle(
-                                  color: Colors.teal.shade600,
-                                  fontSize: 20,
-                                ),
-                              ),
-                              onPressed: () {
-                                _resetVocabStatus();
-                              },
-                            ),
-                          ),
-                        ],
-                      )
                     ]),
               ),
             );
