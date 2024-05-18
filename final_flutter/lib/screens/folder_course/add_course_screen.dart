@@ -15,13 +15,16 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   late TextEditingController titleController;
   ValueNotifier<List<String>>? selectedTypes;
 
+  String? username;
   String? selectedProgress;
+  String? selectedStatus;
   final List<Widget> _vocabContainers = [];
 
   @override
   void initState() {
     super.initState();
     titleController = TextEditingController();
+    getUsernameFromFirestore();
   }
 
   @override
@@ -71,6 +74,25 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
     }
   }
 
+  void getUsernameFromFirestore() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (userSnapshot.exists) {
+        setState(() {
+          username = userSnapshot['userName'];
+        });
+      } else {
+        setState(() {
+          username = 'Unknown';
+        });
+      }
+    }
+  }
+
   Future<void> _saveCourseDataToFirestore(BuildContext context) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -99,7 +121,6 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       }
 
       String userId = user.uid;
-      String username = user.displayName ?? 'Unknown';
 
       DocumentReference courseRef = FirebaseFirestore.instance
           .collection('users')
@@ -110,7 +131,9 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       await courseRef.set({
         'title': titleController.text,
         'progress': selectedProgress,
+        'status': selectedStatus,
         'username': username,
+        'userId': userId,
       });
 
       for (var i = 0; i < _vocabContainers.length; i++) {
@@ -275,6 +298,66 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                     ],
                   ),
                   const SizedBox(height: 30),
+                  Row(
+                    children: [
+                      const Text(
+                        'Ai có thể xem',
+                        style: TextStyle(
+                          fontSize: 12.0,
+                          color: Colors.black,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      SizedBox(
+                        width: 180,
+                        height: 35,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(30.0),
+                          ),
+                          child: DropdownButtonFormField<String>(
+                            value: selectedStatus,
+                            onChanged: (value) {
+                              setState(() {
+                                selectedStatus = value;
+                              });
+                            },
+                            iconSize: 18,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderSide: const BorderSide(
+                                    color: Colors.black, width: 5.0),
+                                borderRadius: BorderRadius.circular(30.0),
+                              ),
+                              contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 10, horizontal: 16),
+                            ),
+                            style: const TextStyle(
+                              fontSize: 10,
+                            ),
+                            items: <String>[
+                              'Mọi người',
+                              'Chỉ mình tôi',
+                            ].map<DropdownMenuItem<String>>((String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  value,
+                                  style: TextStyle(
+                                    color: value == 'Mọi người'
+                                        ? Colors.green
+                                        : Colors.black,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 30),
                   Column(
                     children: _vocabContainers,
                   ),
@@ -294,8 +377,6 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                       ),
                     ),
                   ),
-                  ElevatedButton(
-                      onPressed: () => add(context), child: const Text('asdas'))
                 ],
               ),
             ),
