@@ -175,7 +175,7 @@ class _CourseDetailState extends State<CourseDetail> {
           context,
           MaterialPageRoute(
               builder: (context) =>
-                  TestCourse(userId: widget.userId, courseId: widget.courseId)),
+                  QuizTest(userId: widget.userId, courseId: widget.courseId)),
         );
         break;
       case 'Xếp hạng':
