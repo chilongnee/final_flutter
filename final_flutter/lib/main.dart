@@ -13,11 +13,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: const FirebaseOptions(
-      apiKey: "AIzaSyDNTGb-xiizr6BxvTZgPG4wMoilKGCma_U",
-      appId: "1:239108711351:android:b31df33083edbebfad3e32",
-      messagingSenderId: "239108711351",
-      projectId: "final-flutter-80ee0",
-      storageBucket: "gs://final-flutter-80ee0.appspot.com",
+      apiKey: "AIzaSyC6RU0OApSLBSVbE-5LXLBga1RciSh2ziQ",
+      appId: "1:49611684810:android:2630335e488b2470946d33",
+      messagingSenderId: "49611684810",
+      projectId: "english-app-final",
+      storageBucket: "gs://english-app-final.appspot.com",
     ),
   );
   runApp(MyApp());
