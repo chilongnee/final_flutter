@@ -1,10 +1,11 @@
+import 'package:final_flutter/screens/folder_course/edit_course_detail_screen.dart';
 import 'package:final_flutter/screens/folder_course/memory_card.dart';
 import 'package:final_flutter/screens/folder_course/ranking_screen.dart';
 import 'package:final_flutter/screens/folder_course/summarize_memory_card.dart';
 import 'package:final_flutter/screens/folder_course/quiz_test.dart';
 import 'package:final_flutter/screens/folder_course/type_test.dart';
+import 'package:final_flutter/widgets/bottom_sheet.dart';
 import 'package:final_flutter/widgets/multiselect_dialog.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
@@ -29,274 +30,148 @@ class _CourseDetailState extends State<CourseDetail> {
   late Future<DocumentSnapshot> _courseFuture;
   late FlutterTts flutterTts = FlutterTts();
   late Map<String, bool> _isClickedMap; // Track star status for each vocabulary
-  String? selectedStatus;
-  String? selectedProgress;
-  bool isEditing = false;
 
   @override
-void initState() {
-  super.initState();
-  _courseFuture = FirebaseFirestore.instance
-      .collection('users')
-      .doc(widget.userId)
-      .collection('courses')
-      .doc(widget.courseId)
-      .get()
-      .then((snapshot) {
-    if (snapshot.exists) {
-      setState(() {
-        selectedProgress = snapshot['progress'];
-        selectedStatus = snapshot['status'];
-      });
-    }
-    return snapshot;
-  });
-}
-
+  void initState() {
+    super.initState();
+    _courseFuture = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('courses')
+        .doc(widget.courseId)
+        .get();
+  }
 
   @override
-Widget build(BuildContext context) {
-  final Size screenSize = MediaQuery.of(context).size;
+  Widget build(BuildContext context) {
+    final Size screenSize = MediaQuery.of(context).size;
 
-  return Scaffold(
-    appBar: AppBar(
-      title: FutureBuilder(
-        future: _courseFuture,
-        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          } else if (snapshot.hasError) {
-            return const Text('Error');
-          } else if (!snapshot.hasData) {
-            return const Text('Course not found');
-          } else {
-            final courseData = snapshot.data!;
-            final String courseTitle = courseData['title'];
-            return Text(courseTitle);
-          }
-        },
-      ),
-      actions: [
-        IconButton(
-          onPressed: () {
-            setState(() {
-              isEditing = !isEditing;
-            });
+    return Scaffold(
+      appBar: AppBar(
+        title: FutureBuilder(
+          future: _courseFuture,
+          builder:
+              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else if (!snapshot.hasData) {
+              return const Text('Course not found');
+            } else {
+              final courseData = snapshot.data!;
+              final String courseTitle = courseData['title'];
+              return Text(courseTitle);
+            }
           },
-          icon: Icon(Icons.settings),
         ),
-        if (isEditing)
+        actions: [
           IconButton(
+            icon: const Icon(Icons.more_vert, size: 28, color: Colors.black),
             onPressed: () {
-              _saveCourseSettings();
+              showModalBottomSheet(
+                context: context,
+                builder: (context) => BottomSheetWidget(
+                  height: 200,
+                  buttons: const [
+                    Text('Sửa học phần'),
+                    Text('Thêm vào thư mục'),
+                  ],
+                  onPressed: (index) {
+                    switch (index) {
+                      case 0:
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditCourseDetailScreen(
+                                courseId: widget.courseId),
+                          ),
+                        );
+                        break;
+                      case 1:
+                        print('Nhấn Thêm vào thư mục');
+                        break;
+                    }
+                  },
+                ),
+              );
             },
-            icon: Icon(Icons.save),
           ),
-      ],
-    ),
-    body: Container(
-      width: screenSize.width,
-      height: screenSize.height,
-      color: Colors.teal.shade200,
-      child: FutureBuilder(
-        future: _courseFuture,
-        builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return const Center(child: Text('Error'));
-          } else if (!snapshot.hasData) {
-            return const Center(child: Text('Course not found'));
-          } else {
-            final courseData = snapshot.data!;
-            final String courseTitle = courseData['title'];
-            final String progress = courseData['progress'];
+        ],
+      ),
+      body: Container(
+        width: screenSize.width,
+        height: screenSize.height,
+        color: Colors.teal.shade200,
+        child: FutureBuilder(
+          future: _courseFuture,
+          builder:
+              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return const Center(child: Text('Error'));
+            } else if (!snapshot.hasData) {
+              return const Center(child: Text('Course not found'));
+            } else {
+              final courseData = snapshot.data!;
+              final String courseTitle = courseData['title'];
+              final String progress = courseData['progress'];
 
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 16.0),
-                  Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.0),
-                      color: Colors.white,
-                    ),
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25.0),
-                            color: Colors.grey[200],
-                          ),
-                          child: const Icon(Icons.image),
-                        ),
-                        const SizedBox(width: 16.0),
-                        Expanded(
-                          child: Text(
-                            courseTitle,
-                            style: const TextStyle(fontSize: 20),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16.0),
-                  _buildBox(context, 'Thẻ ghi nhớ'),
-                  _buildBox(context, 'Học (Type)'),
-                  _buildBox(context, 'Kiểm tra (Quiz)'),
-                  _buildBox(context, 'Xếp hạng'),
-                  const SizedBox(height: 16.0),
-                  Row(
-                    children: [
-                      const Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+              return SingleChildScrollView(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 16.0),
+                    Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10.0),
+                        color: Colors.white,
+                      ),
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
                         children: [
-                          Text(
-                            'Tiến độ:',
-                            style: TextStyle(
-                              fontSize: 12.0,
-                              color: Colors.black,
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(25.0),
+                              color: Colors.grey[200],
+                              // image: DecorationImage(
+                              //   image: NetworkImage('URL_HINH_ANH'),
+                              //   fit: BoxFit.cover,
+                              // ),
+                            ),
+                            child: const Icon(Icons.image),
+                          ),
+                          const SizedBox(width: 16.0),
+                          Expanded(
+                            child: Text(
+                              courseTitle,
+                              style: const TextStyle(fontSize: 20),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(width: 43.0),
-                      SizedBox(
-                        width: 140,
-                        height: 35,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(30.0),
-                          ),
-                          child: DropdownButtonFormField<String>(
-                            value: selectedProgress,
-                            onChanged: isEditing
-                                ? (value) {
-                                    setState(() {
-                                      selectedProgress = value;
-                                    });
-                                  }
-                                : null,
-                            iconSize: 18,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                    color: Colors.black, width: 5.0),
-                                borderRadius:
-                                    BorderRadius.circular(30.0),
-                              ),
-                              contentPadding:
-                                  const EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 16),
-                            ),
-                            style: const TextStyle(
-                              fontSize: 10,
-                            ),
-                            items: <String>[
-                              'Hoàn thành',
-                              'Chưa hoàn thành',
-                            ].map<DropdownMenuItem<String>>(
-                                (String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: TextStyle(
-                                    color: value == 'Hoàn thành'
-                                        ? Colors.green
-                                        : Colors.red,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16.0),
-                  Row(
-                    children: [
-                      const Text(
-                        'Ai có thể xem:',
-                        style: TextStyle(
-                          fontSize: 12.0,
-                          color: Colors.black,
-                        ),
-                        
-                      ),
-                      const SizedBox(width: 16.0),
-                      SizedBox(
-                        width: 110,
-                        height: 35,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(30.0),
-                          ),
-                          child: DropdownButtonFormField<String>(
-                            value: selectedStatus,
-                            onChanged: isEditing
-                                ? (value) {
-                                    setState(() {
-                                      selectedStatus = value;
-                                    });
-                                  }
-                                : null,
-                            iconSize: 18,
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(
-                                borderSide: const BorderSide(
-                                    color: Colors.black, width: 5.0),
-                                borderRadius:
-                                    BorderRadius.circular(30.0),
-                              ),
-                              contentPadding:
-                                  const EdgeInsets.symmetric(
-                                      vertical: 10, horizontal: 16),
-                            ),
-                            style: const TextStyle(
-                              fontSize: 10,
-                            ),
-                            items: <String>[
-                              'Mọi người',
-                              'Chỉ mình tôi',
-                            ].map<DropdownMenuItem<String>>((String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: TextStyle(
-                                    color: value == 'Mọi người'
-                                        ? Colors.green
-                                        : Colors.black,
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  _buildBoxForVocabularies(),
-                ],
-              ),
-            );
-          }
-        },
+                    ),
+                    const SizedBox(height: 16.0),
+                    _buildBox(context, 'Thẻ ghi nhớ'),
+                    _buildBox(context, 'Học (Type)'),
+                    _buildBox(context, 'Kiểm tra (Quiz)'),
+                    _buildBox(context, 'Xếp hạng'),
+                    const SizedBox(height: 16.0),
+                    _buildBoxForVocabularies(),
+                  ],
+                ),
+              );
+            }
+          },
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   Widget _buildBox(BuildContext context, String title) {
     return GestureDetector(
@@ -468,7 +343,7 @@ Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
     return Slidable(
         key: ValueKey(vocabId),
-        endActionPane: ActionPane(motion: BehindMotion(), children: [
+        endActionPane: ActionPane(motion: const BehindMotion(), children: [
           SlidableAction(
             onPressed: (BuildContext context) => _deleteVocabulary(vocabId),
             backgroundColor: Colors.red,
@@ -571,12 +446,12 @@ Widget build(BuildContext context) {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Chỉnh sửa từ vựng'),
+              title: const Text('Chỉnh sửa từ vựng'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
-                    decoration: InputDecoration(labelText: 'Tên từ vựng'),
+                    decoration: const InputDecoration(labelText: 'Tên từ vựng'),
                     onChanged: (newValue) {
                       editedVocabularyName = newValue;
                     },
@@ -584,7 +459,7 @@ Widget build(BuildContext context) {
                         TextEditingController(text: editedVocabularyName),
                   ),
                   TextField(
-                    decoration: InputDecoration(labelText: 'Ý nghĩa'),
+                    decoration: const InputDecoration(labelText: 'Ý nghĩa'),
                     onChanged: (newValue) {
                       editedVocabularyMeaning = newValue;
                     },
@@ -649,13 +524,13 @@ Widget build(BuildContext context) {
                         editedVocabularyMeaning, editedTypes, isStar);
                     Navigator.of(context).pop();
                   },
-                  child: Text('Lưu'),
+                  child: const Text('Lưu'),
                 ),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text('Hủy'),
+                  child: const Text('Hủy'),
                 ),
               ],
             );
@@ -664,30 +539,6 @@ Widget build(BuildContext context) {
       },
     );
   }
-
-  Future<void> _saveCourseSettings() async {
-  try {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.userId)
-        .collection('courses')
-        .doc(widget.courseId)
-        .update({
-      'progress': selectedProgress,
-      'status': selectedStatus,
-    });
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Cập nhật thành công'),
-      backgroundColor: Colors.green,
-    ));
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text('Cập nhật thất bại'),
-      backgroundColor: Colors.red,
-    ));
-  }
-}
-
 
   void _showMultiSelect(ValueNotifier<List<String>> selectedTypes) async {
     final List<String> types = ['Noun', 'Adj', 'Verb', 'Adv'];
@@ -795,13 +646,13 @@ Widget build(BuildContext context) {
           .collection('vocabularies')
           .doc(vocabId)
           .delete();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         backgroundColor: Colors.green,
         content: Text('Xóa từ vựng thành công'),
       ));
     } catch (e) {
       print('Lỗi khi xóa từ vựng: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         backgroundColor: Colors.red,
         content: Text('Đã xảy ra lỗi khi xóa từ vựng'),
       ));
@@ -828,13 +679,13 @@ Widget build(BuildContext context) {
         'types': editedTypes,
         'star': isStar,
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         backgroundColor: Colors.green,
         content: Text('Cập nhật từ vựng thành công'),
       ));
     } catch (e) {
       print('Lỗi khi cập nhật từ vựng: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         backgroundColor: Colors.red,
         content: Text('Đã xảy ra lỗi khi cập nhật từ vựng'),
       ));
