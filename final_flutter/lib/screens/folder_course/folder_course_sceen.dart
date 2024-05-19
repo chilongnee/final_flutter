@@ -115,55 +115,55 @@ class _FolderState extends State<Folder> {
                         );
                       },
                       child: Slidable(
-                                key: ValueKey(folder.id),
-                                endActionPane: ActionPane(
-                                    extentRatio: 0.3,
-                                    motion: BehindMotion(),
-                                    children: [
-                                        SlidableAction(
-                                          onPressed: (BuildContext context) => _deleteFolder(folder.id),
-                                          backgroundColor: Colors.red,
-                                          foregroundColor: Colors.white,
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                          icon: Icons.delete,
-                                          padding: const EdgeInsets.all(16.0),
-                                          label: 'Delete',
-                                        
-                                      ),
-                                    ]),
-                                child:Container(
-                        width: screenWidth,
-                        margin:
-                            const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
-                        padding: const EdgeInsets.all(12.0),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10.0),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              folder['title'],
-                              style: const TextStyle(
-                                  fontSize: 18.0, fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              folder['username'],
-                              style: const TextStyle(fontSize: 14.0),
-                            ),
-                            if (folder['description'] != null)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 8.0),
-                                child: Text(
-                                  folder['description'],
-                                  style: const TextStyle(fontSize: 16.0),
-                                ),
+                        key: ValueKey(folder.id),
+                        endActionPane: ActionPane(
+                            extentRatio: 0.3,
+                            motion: const BehindMotion(),
+                            children: [
+                              SlidableAction(
+                                onPressed: (BuildContext context) =>
+                                    _deleteFolder(folder.id),
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                                borderRadius: BorderRadius.circular(10.0),
+                                icon: Icons.delete,
+                                padding: const EdgeInsets.all(16.0),
+                                label: 'Delete',
                               ),
-                          ],
+                            ]),
+                        child: Container(
+                          width: screenWidth,
+                          margin:
+                              const EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
+                          padding: const EdgeInsets.all(12.0),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10.0),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                folder['title'],
+                                style: const TextStyle(
+                                    fontSize: 18.0,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                folder['username'],
+                                style: const TextStyle(fontSize: 14.0),
+                              ),
+                              if (folder['description'] != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Text(
+                                    folder['description'],
+                                    style: const TextStyle(fontSize: 16.0),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
-                      ),
                       ),
                     );
                   },
@@ -256,11 +256,11 @@ class _FolderState extends State<Folder> {
                                 key: ValueKey(course.id),
                                 endActionPane: ActionPane(
                                     extentRatio: 0.3,
-                                    motion: BehindMotion(),
+                                    motion: const BehindMotion(),
                                     children: [
                                       SlidableAction(
-                                        
-                                        onPressed: (BuildContext context) => _deleteTopic(course.id),
+                                        onPressed: (BuildContext context) =>
+                                            _deleteTopic(course.id),
                                         backgroundColor: Colors.red,
                                         foregroundColor: Colors.white,
                                         borderRadius:
@@ -269,9 +269,7 @@ class _FolderState extends State<Folder> {
                                         padding: const EdgeInsets.all(16.0),
                                         label: 'Delete',
                                       ),
-                                    ]
-                                    ),
-                                
+                                    ]),
                                 child: Container(
                                   width: screenWidth,
                                   margin: const EdgeInsets.fromLTRB(
@@ -315,56 +313,55 @@ class _FolderState extends State<Folder> {
       },
     );
   }
-  
+
   void _deleteTopic(String id) async {
-  try {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .collection('courses')
-        .doc(id)
-        .delete();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        backgroundColor: Colors.green,
-        content: Text('Chủ đề đã được xóa thành công'),
-      ),
-    );
-  } catch (e) {
-    // Xử lý lỗi nếu có
-    print('Lỗi khi xóa chủ đề: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        backgroundColor: Colors.red,
-        content: Text('Đã xảy ra lỗi khi xóa chủ đề'),
-      ),
-    );
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection('courses')
+          .doc(id)
+          .delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.green,
+          content: Text('Chủ đề đã được xóa thành công'),
+        ),
+      );
+    } catch (e) {
+      // Xử lý lỗi nếu có
+      print('Lỗi khi xóa chủ đề: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.red,
+          content: Text('Đã xảy ra lỗi khi xóa chủ đề'),
+        ),
+      );
+    }
   }
-}
-void _deleteFolder(String id) async {
-  try {
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .collection('folders')
-        .doc(id)
-        .delete();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        backgroundColor: Colors.green,
-        content: Text('Thư mục đã được xóa thành công'),
-      ),
-    );
-  } catch (e) {
-    print('Lỗi khi xóa thư mục: $e');
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        backgroundColor: Colors.red,
-        content: Text('Đã xảy ra lỗi khi xóa thư mục'),
-      ),
-    );
+
+  void _deleteFolder(String id) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection('folders')
+          .doc(id)
+          .delete();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.green,
+          content: Text('Thư mục đã được xóa thành công'),
+        ),
+      );
+    } catch (e) {
+      print('Lỗi khi xóa thư mục: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          backgroundColor: Colors.red,
+          content: Text('Đã xảy ra lỗi khi xóa thư mục'),
+        ),
+      );
+    }
   }
-}
-
-
 }

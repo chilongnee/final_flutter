@@ -249,7 +249,7 @@ class _RankingScreenState extends State<RankingScreen> {
             ),
           ),
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Image.asset(
               'assets/avtUser.png',
               width: screenSize.width * 0.3,
@@ -257,7 +257,7 @@ class _RankingScreenState extends State<RankingScreen> {
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: 4,
             child: Text(
               user['userName'],
               style: TextStyle(
@@ -267,7 +267,7 @@ class _RankingScreenState extends State<RankingScreen> {
             ),
           ),
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Text(
               user['totalRight'],
               style: TextStyle(
@@ -303,7 +303,7 @@ class _RankingScreenState extends State<RankingScreen> {
             ),
           ),
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Image.asset(
               'assets/avtUser.png',
               width: screenSize.width * 0.3,
@@ -311,7 +311,7 @@ class _RankingScreenState extends State<RankingScreen> {
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: 4,
             child: Text(
               'Username',
               style: TextStyle(
@@ -321,7 +321,7 @@ class _RankingScreenState extends State<RankingScreen> {
             ),
           ),
           Expanded(
-            flex: 2,
+            flex: 1,
             child: Text(
               '0/0',
               style: TextStyle(

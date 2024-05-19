@@ -6,28 +6,29 @@ import 'package:final_flutter/screens/folder_course/quiz_test.dart';
 import 'package:final_flutter/screens/folder_course/type_test.dart';
 import 'package:final_flutter/widgets/bottom_sheet.dart';
 import 'package:final_flutter/widgets/multiselect_dialog.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-class CourseDetail extends StatefulWidget {
+class FolderCourseDetail extends StatefulWidget {
   final String userId;
+  final String folderId;
   final String courseId;
 
-  const CourseDetail({
+  const FolderCourseDetail({
     super.key,
     required this.userId,
+    required this.folderId,
     required this.courseId,
   });
 
   @override
-  _CourseDetailState createState() => _CourseDetailState();
+  _FolderCourseDetailState createState() => _FolderCourseDetailState();
 }
 
-class _CourseDetailState extends State<CourseDetail> {
+class _FolderCourseDetailState extends State<FolderCourseDetail> {
   late Future<DocumentSnapshot> _courseFuture;
   late FlutterTts flutterTts = FlutterTts();
   late Map<String, bool> _isClickedMap;
@@ -38,6 +39,8 @@ class _CourseDetailState extends State<CourseDetail> {
     _courseFuture = FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userId)
+        .collection('folders')
+        .doc(widget.folderId)
         .collection('courses')
         .doc(widget.courseId)
         .get();
@@ -195,7 +198,7 @@ class _CourseDetailState extends State<CourseDetail> {
     );
   }
 
-  void _handleBoxTap(BuildContext context, String title) async{
+  void _handleBoxTap(BuildContext context, String title) {
     // Thực hiện điều gì đó dựa vào title
     // Ví dụ: chuyển sang màn hình tương ứng với title
     switch (title) {
@@ -219,22 +222,12 @@ class _CourseDetailState extends State<CourseDetail> {
         );
         break;
       case 'Xếp hạng':
-         bool hasRankingData = await _checkRankingData();
-        if (hasRankingData) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => RankingScreen(
-                    userId: widget.userId, courseId: widget.courseId)),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              backgroundColor: Colors.red,
-              content: Text('Không có dữ liệu xếp hạng'),
-            ),
-          );
-        }
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => RankingScreen(
+                  userId: widget.userId, courseId: widget.courseId)),
+        );
         break;
       default:
         // Xử lý mặc định nếu không có trường hợp nào khớp
@@ -591,6 +584,8 @@ class _CourseDetailState extends State<CourseDetail> {
     return FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userId)
+        .collection('folders')
+        .doc(widget.folderId)
         .collection('courses')
         .doc(widget.courseId)
         .collection('vocabularies')
@@ -601,6 +596,8 @@ class _CourseDetailState extends State<CourseDetail> {
     await FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userId)
+        .collection('folders')
+        .doc(widget.folderId)
         .collection('courses')
         .doc(widget.courseId)
         .collection('vocabularies')
@@ -612,6 +609,8 @@ class _CourseDetailState extends State<CourseDetail> {
     final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userId)
+        .collection('folders')
+        .doc(widget.folderId)
         .collection('courses')
         .doc(widget.courseId)
         .collection('vocabularies')
@@ -652,6 +651,8 @@ class _CourseDetailState extends State<CourseDetail> {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
+          .collection('folders')
+          .doc(widget.folderId)
           .collection('courses')
           .doc(widget.courseId)
           .collection('vocabularies')
@@ -680,6 +681,8 @@ class _CourseDetailState extends State<CourseDetail> {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
+          .collection('folders')
+          .doc(widget.folderId)
           .collection('courses')
           .doc(widget.courseId)
           .collection('vocabularies')
@@ -702,24 +705,4 @@ class _CourseDetailState extends State<CourseDetail> {
       ));
     }
   }
-  Future<bool> _checkRankingData() async {
-  final currentUserId = FirebaseAuth.instance.currentUser?.uid;
-
-  if (currentUserId == null) {
-    return false; // Không có người dùng hiện tại
-  }
-
-  final querySnapshot = await FirebaseFirestore.instance
-      .collection('users')
-      .doc(widget.userId)
-      .collection('courses')
-      .doc(widget.courseId)
-      .collection('ranking')
-      .where('userId', isEqualTo: currentUserId)
-      .get();
-
-  return querySnapshot.docs.isNotEmpty;
-}
-
-
 }
