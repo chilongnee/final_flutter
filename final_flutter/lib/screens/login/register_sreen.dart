@@ -30,7 +30,7 @@ class _SignUpState extends State<SignUp> {
   final cfpasswordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _obscureText = true;
-  final bool _obscureText2 = true;
+  bool _obscureText2 = true;
   final bool _rememberMe = false;
   bool _isSigningUp = false;
   final FocusNode _username = FocusNode();
@@ -249,7 +249,7 @@ class _SignUpState extends State<SignUp> {
                             enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide:
-                                    const BorderSide(color: Colors.white)),
+                                    const BorderSide(color: Colors.white)), 
                             focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                                 borderSide:
@@ -261,14 +261,14 @@ class _SignUpState extends State<SignUp> {
                               padding: const EdgeInsets.only(right: 10.0),
                               child: IconButton(
                                 icon: Icon(
-                                  _obscureText
+                                  _obscureText2
                                       ? Icons.visibility
                                       : Icons.visibility_off,
                                   color: Colors.black,
                                 ),
                                 onPressed: () {
                                   setState(() {
-                                    _obscureText = !_obscureText;
+                                    _obscureText2 = !_obscureText2;
                                   });
                                 },
                               ),
