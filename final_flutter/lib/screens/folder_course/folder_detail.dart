@@ -1,3 +1,5 @@
+import 'package:final_flutter/screens/folder_course/edit_folder_screen.dart';
+import 'package:final_flutter/screens/folder_course/folder_course_detail.dart';
 import 'package:final_flutter/widgets/bottom_sheet.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -66,7 +68,6 @@ class _FolderDetailState extends State<FolderDetail> {
         Map<String, dynamic> courseInfo =
             courseData.data() as Map<String, dynamic>;
 
-        // Thêm khóa học vào thư mục
         await FirebaseFirestore.instance
             .collection('users')
             .doc(widget.userId)
@@ -90,7 +91,13 @@ class _FolderDetailState extends State<FolderDetail> {
               .set(vocabDoc.data());
         }
 
-        // await courseRef.delete();
+        await courseRef.collection('vocabularies').get().then((snapshot) {
+          for (DocumentSnapshot doc in snapshot.docs) {
+            doc.reference.delete();
+          }
+        });
+
+        await courseRef.delete();
 
         await _loadCoursesInFolder();
       } else {
@@ -98,6 +105,61 @@ class _FolderDetailState extends State<FolderDetail> {
       }
     } catch (e) {
       print("Error retrieving course data: $e");
+    }
+  }
+
+  void _removeCourseFromFolder(String courseId) async {
+    try {
+      final courseRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.userId)
+          .collection('folders')
+          .doc(widget.folderId)
+          .collection('courses')
+          .doc(courseId);
+      final courseData = await courseRef.get();
+
+      if (courseData.exists) {
+        Map<String, dynamic> courseInfo =
+            courseData.data() as Map<String, dynamic>;
+
+        // Sao chép thông tin của khóa học từ collection 'courses' của thư mục sang collection 'courses' của người dùng
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.userId)
+            .collection('courses')
+            .doc(courseId)
+            .set(courseInfo);
+
+        // Sao chép từ vựng từ collection 'vocabularies' của thư mục sang collection 'vocabularies' của khóa học
+        final vocabulariesSnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.userId)
+            .collection('folders')
+            .doc(widget.folderId)
+            .collection('courses')
+            .doc(courseId)
+            .collection('vocabularies')
+            .get();
+        for (var doc in vocabulariesSnapshot.docs) {
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.userId)
+              .collection('courses')
+              .doc(courseId)
+              .collection('vocabularies')
+              .doc(doc.id)
+              .set(doc.data());
+        }
+
+        await courseRef.delete();
+
+        await _loadCoursesInFolder();
+      } else {
+        print("Course with ID $courseId does not exist.");
+      }
+    } catch (e) {
+      print("Error removing course from folder: $e");
     }
   }
 
@@ -140,6 +202,20 @@ class _FolderDetailState extends State<FolderDetail> {
                     onPressed: (index) async {
                       switch (index) {
                         case 0:
+                          final editedFolder = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditFolderScreen(
+                                  userId: widget.userId,
+                                  folderId: widget.folderId),
+                            ),
+                          );
+
+                          if (editedFolder != null) {
+                            for (String courseId in editedFolder) {
+                              _removeCourseFromFolder(courseId);
+                            }
+                          }
                           break;
                         case 1:
                           final selectedCourses = await Navigator.push(
@@ -301,12 +377,14 @@ class _FolderDetailState extends State<FolderDetail> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => CourseDetail(
+                    builder: (context) => FolderCourseDetail(
                       courseId: courseId,
+                      folderId: widget.folderId,
                       userId: widget.userId,
                     ),
                   ),
                 );
+                print(widget.folderId);
               },
               child: Container(
                 width: screenWidth,

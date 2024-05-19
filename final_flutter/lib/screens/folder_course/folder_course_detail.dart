@@ -12,21 +12,23 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 
-class CourseDetail extends StatefulWidget {
+class FolderCourseDetail extends StatefulWidget {
   final String userId;
+  final String folderId;
   final String courseId;
 
-  const CourseDetail({
+  const FolderCourseDetail({
     super.key,
     required this.userId,
+    required this.folderId,
     required this.courseId,
   });
 
   @override
-  _CourseDetailState createState() => _CourseDetailState();
+  _FolderCourseDetailState createState() => _FolderCourseDetailState();
 }
 
-class _CourseDetailState extends State<CourseDetail> {
+class _FolderCourseDetailState extends State<FolderCourseDetail> {
   late Future<DocumentSnapshot> _courseFuture;
   late FlutterTts flutterTts = FlutterTts();
   late Map<String, bool> _isClickedMap;
@@ -37,6 +39,8 @@ class _CourseDetailState extends State<CourseDetail> {
     _courseFuture = FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userId)
+        .collection('folders')
+        .doc(widget.folderId)
         .collection('courses')
         .doc(widget.courseId)
         .get();
@@ -580,6 +584,8 @@ class _CourseDetailState extends State<CourseDetail> {
     return FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userId)
+        .collection('folders')
+        .doc(widget.folderId)
         .collection('courses')
         .doc(widget.courseId)
         .collection('vocabularies')
@@ -590,6 +596,8 @@ class _CourseDetailState extends State<CourseDetail> {
     await FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userId)
+        .collection('folders')
+        .doc(widget.folderId)
         .collection('courses')
         .doc(widget.courseId)
         .collection('vocabularies')
@@ -601,6 +609,8 @@ class _CourseDetailState extends State<CourseDetail> {
     final QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userId)
+        .collection('folders')
+        .doc(widget.folderId)
         .collection('courses')
         .doc(widget.courseId)
         .collection('vocabularies')
@@ -641,6 +651,8 @@ class _CourseDetailState extends State<CourseDetail> {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
+          .collection('folders')
+          .doc(widget.folderId)
           .collection('courses')
           .doc(widget.courseId)
           .collection('vocabularies')
@@ -669,6 +681,8 @@ class _CourseDetailState extends State<CourseDetail> {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.userId)
+          .collection('folders')
+          .doc(widget.folderId)
           .collection('courses')
           .doc(widget.courseId)
           .collection('vocabularies')
