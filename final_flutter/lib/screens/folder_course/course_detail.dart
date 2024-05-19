@@ -1,8 +1,10 @@
+import 'package:final_flutter/screens/folder_course/edit_course_detail_screen.dart';
 import 'package:final_flutter/screens/folder_course/memory_card.dart';
 import 'package:final_flutter/screens/folder_course/ranking_screen.dart';
 import 'package:final_flutter/screens/folder_course/summarize_memory_card.dart';
 import 'package:final_flutter/screens/folder_course/quiz_test.dart';
 import 'package:final_flutter/screens/folder_course/type_test.dart';
+import 'package:final_flutter/widgets/bottom_sheet.dart';
 import 'package:final_flutter/widgets/multiselect_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -63,7 +65,39 @@ class _CourseDetailState extends State<CourseDetail> {
             }
           },
         ),
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.settings))],
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_vert, size: 28, color: Colors.black),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (context) => BottomSheetWidget(
+                  height: 200,
+                  buttons: const [
+                    Text('Sửa học phần'),
+                    Text('Thêm vào thư mục'),
+                  ],
+                  onPressed: (index) {
+                    switch (index) {
+                      case 0:
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => EditCourseDetailScreen(
+                                courseId: widget.courseId),
+                          ),
+                        );
+                        break;
+                      case 1:
+                        print('Nhấn Thêm vào thư mục');
+                        break;
+                    }
+                  },
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Container(
         width: screenSize.width,
@@ -309,7 +343,7 @@ class _CourseDetailState extends State<CourseDetail> {
     var screenSize = MediaQuery.of(context).size;
     return Slidable(
         key: ValueKey(vocabId),
-        endActionPane: ActionPane(motion: BehindMotion(), children: [
+        endActionPane: ActionPane(motion: const BehindMotion(), children: [
           SlidableAction(
             onPressed: (BuildContext context) => _deleteVocabulary(vocabId),
             backgroundColor: Colors.red,
@@ -412,12 +446,12 @@ class _CourseDetailState extends State<CourseDetail> {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: Text('Chỉnh sửa từ vựng'),
+              title: const Text('Chỉnh sửa từ vựng'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextField(
-                    decoration: InputDecoration(labelText: 'Tên từ vựng'),
+                    decoration: const InputDecoration(labelText: 'Tên từ vựng'),
                     onChanged: (newValue) {
                       editedVocabularyName = newValue;
                     },
@@ -425,7 +459,7 @@ class _CourseDetailState extends State<CourseDetail> {
                         TextEditingController(text: editedVocabularyName),
                   ),
                   TextField(
-                    decoration: InputDecoration(labelText: 'Ý nghĩa'),
+                    decoration: const InputDecoration(labelText: 'Ý nghĩa'),
                     onChanged: (newValue) {
                       editedVocabularyMeaning = newValue;
                     },
@@ -490,13 +524,13 @@ class _CourseDetailState extends State<CourseDetail> {
                         editedVocabularyMeaning, editedTypes, isStar);
                     Navigator.of(context).pop();
                   },
-                  child: Text('Lưu'),
+                  child: const Text('Lưu'),
                 ),
                 TextButton(
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text('Hủy'),
+                  child: const Text('Hủy'),
                 ),
               ],
             );
@@ -612,13 +646,13 @@ class _CourseDetailState extends State<CourseDetail> {
           .collection('vocabularies')
           .doc(vocabId)
           .delete();
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         backgroundColor: Colors.green,
         content: Text('Xóa từ vựng thành công'),
       ));
     } catch (e) {
       print('Lỗi khi xóa từ vựng: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         backgroundColor: Colors.red,
         content: Text('Đã xảy ra lỗi khi xóa từ vựng'),
       ));
@@ -645,13 +679,13 @@ class _CourseDetailState extends State<CourseDetail> {
         'types': editedTypes,
         'star': isStar,
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         backgroundColor: Colors.green,
         content: Text('Cập nhật từ vựng thành công'),
       ));
     } catch (e) {
       print('Lỗi khi cập nhật từ vựng: $e');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         backgroundColor: Colors.red,
         content: Text('Đã xảy ra lỗi khi cập nhật từ vựng'),
       ));

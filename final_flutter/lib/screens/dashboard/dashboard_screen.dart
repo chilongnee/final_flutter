@@ -24,7 +24,8 @@ class _DashBoardState extends State<DashBoard> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('DashBoard'),
+        title: const Text('Trang chủ'),
+        centerTitle: true,
         automaticallyImplyLeading: false,
       ),
       body: Container(
