@@ -30,6 +30,7 @@ class _TypeTestState extends State<TypeTest> {
   DocumentSnapshot? _currentVocabulary;
   String _userAnswer = '';
   TextEditingController _textEditingController = TextEditingController();
+  bool eng_vi = false;
 
   @override
   void initState() {
@@ -46,7 +47,8 @@ class _TypeTestState extends State<TypeTest> {
       appBar: AppBar(
         title: FutureBuilder(
           future: _course,
-          builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          builder:
+              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const CircularProgressIndicator();
             } else if (snapshot.hasError) {
@@ -67,7 +69,8 @@ class _TypeTestState extends State<TypeTest> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: StreamBuilder<QuerySnapshot>(
               stream: _vocabulariesStream,
-              builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              builder: (BuildContext context,
+                  AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const CircularProgressIndicator();
                 } else if (snapshot.hasError) {
@@ -91,7 +94,8 @@ class _TypeTestState extends State<TypeTest> {
   Widget _buildQuizWidget(Size screenSize) {
     return FutureBuilder(
       future: _listVocab,
-      builder: (BuildContext context, AsyncSnapshot<List<DocumentSnapshot>> snapshot) {
+      builder: (BuildContext context,
+          AsyncSnapshot<List<DocumentSnapshot>> snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         } else if (snapshot.hasError) {
@@ -104,8 +108,12 @@ class _TypeTestState extends State<TypeTest> {
             final String vocabularyName = _currentVocabulary!['term'];
             final String vocabularyMeaning = _currentVocabulary!['definition'];
             final List<dynamic> types = _currentVocabulary!['types'];
-
-            return _buildQuizLayout(screenSize, vocabularyName, vocabularyMeaning, types);
+            if (eng_vi == true) {
+              return _buildQuizLayout(
+                  screenSize, vocabularyMeaning, vocabularyName, types);
+            }
+            return _buildQuizLayout(
+                screenSize, vocabularyName, vocabularyMeaning, types);
           } else {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.pushReplacement(
@@ -128,7 +136,8 @@ class _TypeTestState extends State<TypeTest> {
     );
   }
 
-  Widget _buildQuizLayout(Size screenSize, String vocabularyName, String vocabularyMeaning, List<dynamic> types) {
+  Widget _buildQuizLayout(Size screenSize, String vocabularyName,
+      String vocabularyMeaning, List<dynamic> types) {
     return SingleChildScrollView(
       child: Container(
         height: screenSize.height,
@@ -147,7 +156,9 @@ class _TypeTestState extends State<TypeTest> {
               child: Column(
                 children: [
                   Container(
-                    margin: EdgeInsets.only(top: screenSize.width * 0.1, bottom: screenSize.width * 0.05),
+                    margin: EdgeInsets.only(
+                        top: screenSize.width * 0.1,
+                        bottom: screenSize.width * 0.05),
                     width: screenSize.width * 0.5,
                     height: screenSize.height * 0.3,
                     decoration: BoxDecoration(
@@ -264,8 +275,8 @@ class _TypeTestState extends State<TypeTest> {
   }
 
   void _checkAnswer(String vocabularyName, String correctAnswer) {
-    bool isCorrect = _userAnswer.trim().toLowerCase() ==
-        correctAnswer.trim().toLowerCase();
+    bool isCorrect =
+        _userAnswer.trim().toLowerCase() == correctAnswer.trim().toLowerCase();
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -277,7 +288,8 @@ class _TypeTestState extends State<TypeTest> {
           title: Container(
             padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15)),
+              borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(15), topRight: Radius.circular(15)),
               color: isCorrect ? Colors.green : Colors.red,
             ),
             child: Text(
@@ -288,18 +300,27 @@ class _TypeTestState extends State<TypeTest> {
             ),
           ),
           content: isCorrect
-              ? Text('$vocabularyName - $correctAnswer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),)
+              ? Text(
+                  '$vocabularyName - $correctAnswer',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                )
               : Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('$vocabularyName - $correctAnswer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),),
+                    Text(
+                      '$vocabularyName - $correctAnswer',
+                      style:
+                          TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                    ),
                     SizedBox(height: screenSize.height * 0.01),
-                    Text('Đáp án đúng:', style: TextStyle(fontSize: 15, color: Colors.green)),
+                    Text('Đáp án đúng:',
+                        style: TextStyle(fontSize: 15, color: Colors.green)),
                     SizedBox(height: screenSize.height * 0.008),
                     Text('$correctAnswer', style: TextStyle(fontSize: 15)),
                     SizedBox(height: screenSize.height * 0.01),
-                    Text('Đáp án bạn chọn:', style: TextStyle(fontSize: 15, color: Colors.red)),
+                    Text('Đáp án bạn chọn:',
+                        style: TextStyle(fontSize: 15, color: Colors.red)),
                     SizedBox(height: screenSize.height * 0.008),
                     Text('$_userAnswer', style: TextStyle(fontSize: 15)),
                   ],

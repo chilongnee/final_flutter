@@ -41,6 +41,7 @@ class _QuizTestState extends State<QuizTest> {
   int resultOfTest = 0;
   DocumentSnapshot? _currentVocabulary;
   List<String> _answers = [];
+  bool eng_vi = false;
 
   @override
   void initState() {
@@ -123,7 +124,10 @@ class _QuizTestState extends State<QuizTest> {
               _answers =
                   _generateAnswerChoices(vocabularies, vocabularyMeaning);
             }
-
+            if(eng_vi == true){
+              return _buildQuizLayout(
+                screenSize, vocabularyMeaning, vocabularyName, types, _answers);
+            }
             return _buildQuizLayout(
                 screenSize, vocabularyName, vocabularyMeaning, types, _answers);
           } else {
@@ -285,44 +289,43 @@ class _QuizTestState extends State<QuizTest> {
               ],
             ),
           ),
-          
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    if (answers[2] == vocabularyMeaning) {
-                      setState(() {
-                        _isCorrect3 = true;
-                        resultOfTest = resultOfTest + 1;
-                      });
-                    } else if (answers[2] != vocabularyMeaning) {
-                      setState(() {
-                        _isFalse3 = true;
-                      });
-                    }
-                    _delayAndNextQuestion();
-                  },
-                  child: Container(
-                    width: screenSize.width * 0.4,
-                    height: screenSize.height * 0.06,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10.0),
-                      color: _isFalse3
-                          ? Colors.red
-                          : _isCorrect3
-                              ? Colors.green
-                              : Colors.white,
-                    ),
-                    child: Center(
-                      child: Text(
-                        'C. ${answers[2]}',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  if (answers[2] == vocabularyMeaning) {
+                    setState(() {
+                      _isCorrect3 = true;
+                      resultOfTest = resultOfTest + 1;
+                    });
+                  } else if (answers[2] != vocabularyMeaning) {
+                    setState(() {
+                      _isFalse3 = true;
+                    });
+                  }
+                  _delayAndNextQuestion();
+                },
+                child: Container(
+                  width: screenSize.width * 0.4,
+                  height: screenSize.height * 0.06,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10.0),
+                    color: _isFalse3
+                        ? Colors.red
+                        : _isCorrect3
+                            ? Colors.green
+                            : Colors.white,
+                  ),
+                  child: Center(
+                    child: Text(
+                      'C. ${answers[2]}',
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
-                if (answers.length > 3)
+              ),
+              if (answers.length > 3)
                 GestureDetector(
                   onTap: () {
                     if (answers[3] == vocabularyMeaning) {
@@ -356,8 +359,8 @@ class _QuizTestState extends State<QuizTest> {
                     ),
                   ),
                 ),
-              ],
-            )
+            ],
+          )
         ],
       ),
     );

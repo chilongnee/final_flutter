@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 class RankingScreen extends StatefulWidget {
   final String courseId;
   final String userId;
-  const RankingScreen({
-    required this.userId,
-    required this.courseId,
-    super.key});
+
+  const RankingScreen(
+      {required this.userId, required this.courseId, super.key});
 
   @override
   State<RankingScreen> createState() => _RankingScreenState();
@@ -15,16 +14,15 @@ class RankingScreen extends StatefulWidget {
 
 class _RankingScreenState extends State<RankingScreen> {
   late Future<DocumentSnapshot> _course;
-
-
+  late Stream<QuerySnapshot> _ranking;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _course = _fetchCourses();
+    _ranking = _fetchRanking();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -50,18 +48,39 @@ class _RankingScreenState extends State<RankingScreen> {
         ),
         centerTitle: true,
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(screenSize.height * 0.001),
-          child: Text(
-                    'Xếp hạng',
-                    style: TextStyle(fontSize: 16.0, color: Colors.black, fontWeight: FontWeight.bold),
-                  )
-        ),
+            preferredSize: Size.fromHeight(screenSize.height * 0.001),
+            child: Text(
+              'Xếp hạng',
+              style: TextStyle(
+                  fontSize: 16.0,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold),
+            )),
       ),
-      body: _buildRankingWidget(screenSize),
+      body: StreamBuilder(
+          stream: _ranking,
+          builder:
+              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else {
+              final rank = snapshot.data!.docs
+                  .where((doc) => doc['userId'] == widget.userId)
+                  .toList();
+              var getRanking = rank[0].data() as Map<String, dynamic>;
+              var totalRight = getRanking['totalRight'];
+              var ranked = getRanking['ranked'];
+              return _buildRankingWidget(screenSize, totalRight, ranked);
+            }
+          }),
+      //body: _buildRankingWidget(screenSize),
     );
   }
 
-  Widget _buildRankingWidget(Size screenSize){
+  Widget _buildRankingWidget(
+      Size screenSize, dynamic totalRight, dynamic ranked) {
     return SingleChildScrollView(
       child: Container(
         color: Colors.teal.shade200,
@@ -69,16 +88,20 @@ class _RankingScreenState extends State<RankingScreen> {
           child: Column(
             children: [
               Padding(
-                padding: EdgeInsets.only(left: screenSize.width * 0.05, top: screenSize.height * 0.01),
+                padding: EdgeInsets.only(
+                    left: screenSize.width * 0.05,
+                    top: screenSize.height * 0.01),
                 child: Row(
                   children: [
-                    Image.asset(
-                      'assets/ranking.png',
-                      width: screenSize.width * 0.1
-                    ),
+                    Image.asset('assets/ranking.png',
+                        width: screenSize.width * 0.1),
                     Padding(
-                      padding: const EdgeInsets.only(top:10, left: 10),
-                      child: Text('Điểm xếp hạng của bạn: 500/600', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),),
+                      padding: const EdgeInsets.only(top: 10, left: 10),
+                      child: Text(
+                        'Điểm xếp hạng của bạn: $totalRight',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20),
+                      ),
                     )
                   ],
                 ),
@@ -99,7 +122,7 @@ class _RankingScreenState extends State<RankingScreen> {
                     Padding(
                       padding: const EdgeInsets.only(top: 10, left: 10),
                       child: Text(
-                        'BẠN ĐANG Ở VỊ TRÍ THỨ 8',
+                        'BẠN ĐANG Ở VỊ TRÍ THỨ $ranked',
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 20,
@@ -135,6 +158,7 @@ class _RankingScreenState extends State<RankingScreen> {
       ),
     );
   }
+
   Future<DocumentSnapshot> _fetchCourses() async {
     return FirebaseFirestore.instance
         .collection('users')
@@ -143,10 +167,24 @@ class _RankingScreenState extends State<RankingScreen> {
         .doc(widget.courseId)
         .get();
   }
-  
+
+  Stream<QuerySnapshot> _fetchRanking() {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('courses')
+        .doc(widget.courseId)
+        .collection('ranking')
+        .snapshots();
+  }
+
   Widget _buildListUser(Size screenSize) {
     return Container(
-      margin: EdgeInsets.only(left: 16, right: 16, top: 8, ),
+      margin: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 8,
+      ),
       padding: EdgeInsets.all(16),
       height: screenSize.height * 0.1,
       decoration: BoxDecoration(
@@ -154,8 +192,8 @@ class _RankingScreenState extends State<RankingScreen> {
         color: Colors.white,
       ),
       child: Row(
-          children: [
-            Expanded(
+        children: [
+          Expanded(
             flex: 1,
             child: Text(
               '01',
@@ -193,7 +231,7 @@ class _RankingScreenState extends State<RankingScreen> {
                   fontWeight: FontWeight.w900),
             ),
           ),
-          ],
+        ],
       ),
     );
   }

@@ -33,11 +33,13 @@ class _SummarizeTestScreenState extends State<SummarizeTest> {
     super.initState();
     _course = _fetchCourses();
     _vocabulariesStream = _fetchVocabularies();
+    bool _processingCompleted = false;
   }
 
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBar(
         title: StreamBuilder<QuerySnapshot>(
@@ -70,7 +72,7 @@ class _SummarizeTestScreenState extends State<SummarizeTest> {
             return const Text('Error');
           } else {
             final vocabularies = snapshot.data!.docs;
-
+            bool _processingCompleted = false;
             return Center(
               child: Container(
                 color: Colors.teal.shade200,
@@ -147,8 +149,7 @@ class _SummarizeTestScreenState extends State<SummarizeTest> {
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold,
                                             fontSize: 20,
-                                            color: Colors.green
-                                            ),
+                                            color: Colors.green),
                                       ),
                                       SizedBox(width: screenSize.width * 0.03),
                                       CircularPercentIndicator(
@@ -200,26 +201,120 @@ class _SummarizeTestScreenState extends State<SummarizeTest> {
                       ),
                       SizedBox(height: screenSize.height * 0.18),
                       SizedBox(
-                              width: screenSize.width * 0.85,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                                child: Text(
-                                  'Quay lại học phần',
-                                  style: TextStyle(
-                                    color: Colors.teal.shade600,
-                                    fontSize: 20,
-                                  ),
-                                ),
-                                onPressed: () {
-                                  Navigator.pop(context);
-                                  Navigator.pop(context);
-                                },
-                              ),
+                        width: screenSize.width * 0.85,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
                             ),
+                          ),
+                          child: Text(
+                            'Quay lại học phần',
+                            style: TextStyle(
+                              color: Colors.teal.shade600,
+                              fontSize: 20,
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: screenSize.width * 0.85,
+                        child: ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            'Tiếp tục',
+                            style: TextStyle(
+                              color: Colors.teal.shade600,
+                              fontSize: 20,
+                            ),
+                          ),
+                          onPressed: () {},
+                        ),
+                      ),
+                      StreamBuilder(
+                          stream: _fetchRanking(),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<QuerySnapshot> snapshot) {
+                            if (_processingCompleted) {
+                              return Container();
+                            } else {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const CircularProgressIndicator();
+                              } else if (snapshot.hasError) {
+                                return const Text('Error');
+                              } else {
+                                List<int> lstTotalRight = [];
+                                var rankOfCurrent = 0;
+                                final rank = snapshot.data!.docs.toList();
+                                if (rank.length == 0) {
+                                  int res = widget.result;
+                                  int totalQuestion = widget.totalVocab.length;
+                                  var totalR = '$res/$totalQuestion';
+                                  addRanking({
+                                    'userId': widget.userId,
+                                    'ranked': rankOfCurrent + 1,
+                                    'totalRight': totalR,
+                                  });
+                                } else {
+                                  for (int i = 0; i < rank.length; i++) {
+                                    var data =
+                                        rank[i].data() as Map<String, dynamic>;
+                                    List<String> parts =
+                                        data['totalRight'].split('/');
+                                    int number = int.parse(parts[0]);
+                                    lstTotalRight.add(number);
+                                  }
+                                  bool isAdd = true;
+                                  bool isDelete = false;
+                                  for (int i = 0; i < rank.length; i++) {
+                                    var data =
+                                        rank[i].data() as Map<String, dynamic>;
+                                    List<String> parts =
+                                        data['totalRight'].split('/');
+                                    int number = int.parse(parts[0]);
+                                    if (data['userId'] == widget.userId &&
+                                        number <= widget.result) {
+                                      isDelete = true;
+                                    } else if (data['userId'] ==
+                                            widget.userId &&
+                                        number > widget.result) {
+                                      isAdd = false;
+                                    }
+                                  }
+                                  if (isDelete == true) {
+                                    deleteDocumentByUserId(widget.userId);
+                                  }
+                                  if (isAdd == true) {
+                                    lstTotalRight.sort();
+                                    rankOfCurrent = addNumberAndGetIndex(
+                                            lstTotalRight, widget.result) +
+                                        1;
+                                    int res = widget.result;
+                                    int totalQuestion =
+                                        widget.totalVocab.length;
+                                    var totalR = '$res/$totalQuestion';
+                                    addRanking({
+                                      'userId': widget.userId,
+                                      'ranked': rankOfCurrent,
+                                      'totalRight': totalR,
+                                    });
+                                  }
+                                  _processingCompleted = true;
+                                }
+
+                                return SizedBox();
+                              }
+                            }
+                          }),
                     ]),
               ),
             );
@@ -227,6 +322,40 @@ class _SummarizeTestScreenState extends State<SummarizeTest> {
         },
       ),
     );
+  }
+
+  Stream<QuerySnapshot> _fetchRanking() {
+    return FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('courses')
+        .doc(widget.courseId)
+        .collection('ranking')
+        .snapshots();
+  }
+
+  Future<void> addRanking(Map<String, dynamic> rankingData) async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('courses')
+        .doc(widget.courseId)
+        .collection('ranking')
+        .add(rankingData);
+  }
+
+  Future<void> deleteDocumentByUserId(String userId) async {
+    QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        .collection('users')
+        .doc(userId)
+        .collection('courses')
+        .doc(widget.courseId)
+        .collection('ranking')
+        .get();
+
+    for (QueryDocumentSnapshot documentSnapshot in querySnapshot.docs) {
+      await documentSnapshot.reference.delete();
+    }
   }
 
   Stream<QuerySnapshot> _fetchVocabularies() {
@@ -246,6 +375,15 @@ class _SummarizeTestScreenState extends State<SummarizeTest> {
         .collection('courses')
         .doc(widget.courseId)
         .get();
+  }
+
+  int addNumberAndGetIndex(List<int> sortedList, int number) {
+    int index = 0;
+    while (index < sortedList.length && sortedList[index] < number) {
+      index++;
+    }
+    sortedList.insert(index, number);
+    return index;
   }
 
   Future<void> _resetVocabStatus() async {
