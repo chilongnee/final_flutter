@@ -279,19 +279,38 @@ class _FolderState extends State<Folder> {
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(10.0),
                                   ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                  child: Row(
                                     children: [
-                                      Text(
-                                        course['title'],
-                                        style: const TextStyle(
-                                            fontSize: 18.0,
-                                            fontWeight: FontWeight.bold),
+                                      Expanded(
+                                          flex: 1,
+                                          child: Image.asset('assets/LHT2.png',
+                                              fit: BoxFit.cover)),
+                                      SizedBox(
+                                        width: screenWidth * 0.08,
                                       ),
-                                      Text(
-                                        'Progress: ${course['progress']}',
-                                        style: const TextStyle(fontSize: 14.0),
+                                      Expanded(
+                                        flex: 2,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              course['title'],
+                                              style: const TextStyle(
+                                                  fontSize: 18.0,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            course['progress'] == 'Hoàn thành'
+                                            ? Text(
+                                              'Trạng thái: ${course['progress']}' ?? '',
+                                              style: const TextStyle(fontSize: 16.0, color: Colors.green),
+                                            )
+                                            :Text(
+                                              'Trạng thái: ${course['progress']}' ?? '',
+                                              style: const TextStyle(fontSize: 16.0, color: Colors.red),
+                                            )
+                                          ],
+                                        ),
                                       ),
                                     ],
                                   ),

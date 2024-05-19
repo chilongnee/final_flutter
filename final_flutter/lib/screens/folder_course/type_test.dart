@@ -171,8 +171,7 @@ class _TypeTestState extends State<TypeTest> {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(10.0),
                       image: const DecorationImage(
-                        image: NetworkImage(
-                            'https://cdn.vn.alongwalk.info/vn/wp-content/uploads/2023/02/15171524/image-188-hinh-anh-con-vit-trang-vang-cute-ngau-ban-nen-xem-167643092454557.jpg'),
+                        image: AssetImage('assets/LHT2.png'),
                         fit: BoxFit.cover,
                       ),
                     ),

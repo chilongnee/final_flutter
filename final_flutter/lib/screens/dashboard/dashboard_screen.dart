@@ -1,6 +1,8 @@
 import 'package:final_flutter/screens/folder_course/course_detail.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/widgets.dart';
 
 class DashBoard extends StatefulWidget {
   const DashBoard({super.key});
@@ -10,6 +12,8 @@ class DashBoard extends StatefulWidget {
 }
 
 class _DashBoardState extends State<DashBoard> {
+  Set<String> _displayedCourseIds = {};
+
   Future<List<DocumentSnapshot>> _fetchPublicCourses() async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collectionGroup('courses')
@@ -45,6 +49,10 @@ class _DashBoardState extends State<DashBoard> {
                 itemCount: courses.length,
                 itemBuilder: (context, index) {
                   DocumentSnapshot course = courses[index];
+                  if (_displayedCourseIds.contains(course.id)) {
+                    return const SizedBox.shrink();
+                  }
+                  _displayedCourseIds.add(course.id);
                   return GestureDetector(
                     onTap: () {
                       Navigator.push(
@@ -65,26 +73,42 @@ class _DashBoardState extends State<DashBoard> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(10.0),
                       ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
                         children: [
-                          Text(
-                            course['title'] ?? 'No Title',
-                            style: const TextStyle(
-                                fontSize: 18.0, fontWeight: FontWeight.bold),
-                          ),
-                          Text(
-                            'Created by ${course['username'] ?? 'Unknown'}',
-                            style: const TextStyle(fontSize: 14.0),
-                          ),
-                          if (course['progress'] != null)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Text(
-                                course['progress'] ?? '',
-                                style: const TextStyle(fontSize: 16.0),
-                              ),
+                          Expanded(
+                            flex: 1,
+                            child: Image.asset('assets/LHT2.png', fit:BoxFit.cover)),
+                            SizedBox(width: screenWidth * 0.08,),
+                          Expanded(
+                            flex:2,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  course['title'] ?? 'No Title',
+                                  style: const TextStyle(
+                                      fontSize: 18.0, fontWeight: FontWeight.bold),
+                                ),
+                                Text(
+                                  'Created by ${course['username'] ?? 'Unknown'}',
+                                  style: const TextStyle(fontSize: 14.0),
+                                ),
+                                if (course['progress'] != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: course['progress'] == 'Hoàn thành'
+                                    ? Text(
+                                      course['progress'] ?? '',
+                                      style: const TextStyle(fontSize: 16.0, color: Colors.green),
+                                    )
+                                    :Text(
+                                      course['progress'] ?? '',
+                                      style: const TextStyle(fontSize: 16.0, color: Colors.red),
+                                    )
+                                  ),
+                              ],
                             ),
+                          ),
                         ],
                       ),
                     ),

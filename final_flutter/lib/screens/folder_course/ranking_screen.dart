@@ -313,7 +313,7 @@ class _RankingScreenState extends State<RankingScreen> {
           Expanded(
             flex: 4,
             child: Text(
-              'Username',
+              'Trống',
               style: TextStyle(
                   color: Color.fromRGBO(51, 51, 153, 1),
                   fontSize: 20,
