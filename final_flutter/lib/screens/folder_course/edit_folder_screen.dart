@@ -92,4 +92,8 @@ class _EditFolderScreenState extends State<EditFolderScreen> {
       ),
     );
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> aaca565f33696639117618aa4978a40e022a0c2b
