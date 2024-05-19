@@ -64,280 +64,268 @@ class _SummarizeTestScreenState extends State<SummarizeTest> {
         ),
         centerTitle: true,
       ),
-      body: StreamBuilder(
-        stream: _vocabulariesStream,
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          } else if (snapshot.hasError) {
-            return const Text('Error');
-          } else {
-            final vocabularies = snapshot.data!.docs;
-            bool _processingCompleted = false;
-            return Center(
-              child: Container(
-                color: Colors.teal.shade200,
-                child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                            vertical: screenSize.height * 0.09,
-                            horizontal: screenSize.width * 0.09),
-                        child: Row(
-                          children: [
-                            Expanded(
+      body: SingleChildScrollView(
+        child: StreamBuilder(
+          stream: _vocabulariesStream,
+          builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const CircularProgressIndicator();
+            } else if (snapshot.hasError) {
+              return const Text('Error');
+            } else {
+              final vocabularies = snapshot.data!.docs;
+              bool _processingCompleted = false;
+              return Center(
+                child: Container(
+                  color: Colors.teal.shade200,
+                  child: Container(
+                    color:Colors.teal.shade200,
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical: screenSize.height * 0.09,
+                                horizontal: screenSize.width * 0.09),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    'Bạn đã học rất tốt! Hãy tiếp tục phát huy nhé',
+                                    style: const TextStyle(
+                                        fontSize: 23, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                SizedBox(width: screenSize.width * 0.08),
+                                Container(
+                                  width: screenSize.width * 0.25,
+                                  height: screenSize.width * 0.25,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(25.0),
+                                    image: DecorationImage(
+                                      image: AssetImage('assets/image_congrat.png'),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: screenSize.height * 0.05,
+                              horizontal: screenSize.width * 0.05,
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  flex: 2,
+                                  child: CircularPercentIndicator(
+                                    animation: true,
+                                    animationDuration: 1000,
+                                    animateFromLastPercent: false,
+                                    radius: screenSize.width * 0.18,
+                                    lineWidth: 15,
+                                    percent:
+                                        widget.result / widget.totalVocab.length,
+                                    progressColor: Colors.green,
+                                    backgroundColor: Colors.orangeAccent.shade200,
+                                    circularStrokeCap: CircularStrokeCap.round,
+                                    center: Text(
+                                      '${(widget.result / widget.totalVocab.length * 100).toStringAsFixed(0)}%',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                // SizedBox(width: screenSize.width * 0.15),
+                                Expanded(
+                                  flex: 2,
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            'Số câu đúng:',
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 20,
+                                                color: Colors.green),
+                                          ),
+                                          SizedBox(width: screenSize.width * 0.03),
+                                          CircularPercentIndicator(
+                                            radius: 20,
+                                            center: Text(
+                                              widget.result.toString(),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                            backgroundColor: Colors.green,
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: screenSize.height * 0.05),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            'Số câu sai:',
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 20,
+                                              color: Colors.orangeAccent.shade200,
+                                            ),
+                                          ),
+                                          SizedBox(width: screenSize.width * 0.085),
+                                          CircularPercentIndicator(
+                                            radius: 20,
+                                            center: Text(
+                                              (widget.totalVocab.length -
+                                                      widget.result)
+                                                  .toString(),
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15,
+                                              ),
+                                            ),
+                                            backgroundColor:
+                                                Colors.orangeAccent.shade200,
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: screenSize.height * 0.2),
+                          SizedBox(
+                            width: screenSize.width * 0.85,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
                               child: Text(
-                                'Bạn đã học rất tốt! Hãy tiếp tục phát huy nhé',
-                                style: const TextStyle(
-                                    fontSize: 23, fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                            SizedBox(width: screenSize.width * 0.08),
-                            Container(
-                              width: screenSize.width * 0.25,
-                              height: screenSize.width * 0.25,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(25.0),
-                                image: DecorationImage(
-                                  image: AssetImage('assets/image_congrat.png'),
-                                  fit: BoxFit.cover,
+                                'Quay lại học phần',
+                                style: TextStyle(
+                                  color: Colors.teal.shade600,
+                                  fontSize: 20,
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: screenSize.height * 0.02,
-                          horizontal: screenSize.width * 0.05,
-                        ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: CircularPercentIndicator(
-                                animation: true,
-                                animationDuration: 1000,
-                                animateFromLastPercent: false,
-                                radius: screenSize.width * 0.18,
-                                lineWidth: 15,
-                                percent:
-                                    widget.result / widget.totalVocab.length,
-                                progressColor: Colors.green,
-                                backgroundColor: Colors.orangeAccent.shade200,
-                                circularStrokeCap: CircularStrokeCap.round,
-                                center: Text(
-                                  '${(widget.result / widget.totalVocab.length * 100).toStringAsFixed(0)}%',
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            // SizedBox(width: screenSize.width * 0.15),
-                            Expanded(
-                              flex: 2,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'Số câu đúng:',
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 20,
-                                            color: Colors.green),
-                                      ),
-                                      SizedBox(width: screenSize.width * 0.03),
-                                      CircularPercentIndicator(
-                                        radius: 20,
-                                        center: Text(
-                                          widget.result.toString(),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                        backgroundColor: Colors.green,
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: screenSize.height * 0.05),
-                                  Row(
-                                    children: [
-                                      Text(
-                                        'Số câu sai:',
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20,
-                                          color: Colors.orangeAccent.shade200,
-                                        ),
-                                      ),
-                                      SizedBox(width: screenSize.width * 0.085),
-                                      CircularPercentIndicator(
-                                        radius: 20,
-                                        center: Text(
-                                          (widget.totalVocab.length -
-                                                  widget.result)
-                                              .toString(),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 15,
-                                          ),
-                                        ),
-                                        backgroundColor:
-                                            Colors.orangeAccent.shade200,
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: screenSize.height * 0.18),
-                      SizedBox(
-                        width: screenSize.width * 0.85,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
+                              onPressed: () {
+                                Navigator.pop(context);
+                                Navigator.pop(context);
+                              },
                             ),
                           ),
-                          child: Text(
-                            'Quay lại học phần',
-                            style: TextStyle(
-                              color: Colors.teal.shade600,
-                              fontSize: 20,
-                            ),
-                          ),
-                          onPressed: () {
-                            Navigator.pop(context);
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ),
-                      SizedBox(
-                        width: screenSize.width * 0.85,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: Text(
-                            'Tiếp tục',
-                            style: TextStyle(
-                              color: Colors.teal.shade600,
-                              fontSize: 20,
-                            ),
-                          ),
-                          onPressed: () {},
-                        ),
-                      ),
-                      StreamBuilder(
-                          stream: _fetchRanking(),
-                          builder: (BuildContext context,
-                              AsyncSnapshot<QuerySnapshot> snapshot) {
-                            if (_processingCompleted) {
-                              return Container();
-                            } else {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const CircularProgressIndicator();
-                              } else if (snapshot.hasError) {
-                                return const Text('Error');
-                              } else {
-                                List<int> lstTotalRight = [];
-                                var rankOfCurrent = 0;
-                                final rank = snapshot.data!.docs.toList();
-                                if (rank.length == 0) {
-                                  int res = widget.result;
-                                  int totalQuestion = widget.totalVocab.length;
-                                  var totalR = '$res/$totalQuestion';
-                                  addRanking({
-                                    'userId':
-                                        FirebaseAuth.instance.currentUser!.uid,
-                                    'ranked': rankOfCurrent + 1,
-                                    'totalRight': totalR,
-                                  });
+                          
+                          StreamBuilder(
+                              stream: _fetchRanking(),
+                              builder: (BuildContext context,
+                                  AsyncSnapshot<QuerySnapshot> snapshot) {
+                                if (_processingCompleted) {
+                                  return Container();
                                 } else {
-                                  for (int i = 0; i < rank.length; i++) {
-                                    var data =
-                                        rank[i].data() as Map<String, dynamic>;
-                                    List<String> parts =
-                                        data['totalRight'].split('/');
-                                    int number = int.parse(parts[0]);
-                                    lstTotalRight.add(number);
-                                  }
-                                  bool isAdd = true;
-                                  bool isDelete = false;
-                                  String temp = "";
-                                  for (int i = 0; i < rank.length; i++) {
-                                    var data =
-                                        rank[i].data() as Map<String, dynamic>;
-                                    List<String> parts =
-                                        data['totalRight'].split('/');
-                                    int number = int.parse(parts[0]);
-                                    if (data['userId'] ==
-                                            FirebaseAuth
-                                                .instance.currentUser!.uid &&
-                                        number <= widget.result) {
-                                      temp = data['totalRight'];
-                                      // print(temp);
-                                      // print(FirebaseAuth
-                                      //     .instance.currentUser!.uid);
-                                      deleteDocumentByUserId(
-                                          FirebaseAuth
-                                              .instance.currentUser!.uid,
-                                          temp);
-                                    } else if (data['userId'] ==
-                                            FirebaseAuth
-                                                .instance.currentUser!.uid &&
-                                        number > widget.result) {
-                                      isAdd = false;
-                                    }
-                                  }
-                                  if (isAdd == true) {
-                                    lstTotalRight.sort();
-                                    rankOfCurrent = addNumberAndGetIndex(
-                                            lstTotalRight, widget.result) +
-                                        1;
-                                    lstTotalRight.sort();
-                                    lstTotalRight =
-                                        lstTotalRight.reversed.toList();
-                                    rankOfCurrent =
-                                        lstTotalRight.indexOf(widget.result) +
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return const CircularProgressIndicator();
+                                  } else if (snapshot.hasError) {
+                                    return const Text('Error');
+                                  } else {
+                                    List<int> lstTotalRight = [];
+                                    var rankOfCurrent = 0;
+                                    final rank = snapshot.data!.docs.toList();
+                                    if (rank.length == 0) {
+                                      int res = widget.result;
+                                      int totalQuestion = widget.totalVocab.length;
+                                      var totalR = '$res/$totalQuestion';
+                                      addRanking({
+                                        'userId':
+                                            FirebaseAuth.instance.currentUser!.uid,
+                                        'ranked': rankOfCurrent + 1,
+                                        'totalRight': totalR,
+                                      });
+                                    } else {
+                                      for (int i = 0; i < rank.length; i++) {
+                                        var data =
+                                            rank[i].data() as Map<String, dynamic>;
+                                        List<String> parts =
+                                            data['totalRight'].split('/');
+                                        int number = int.parse(parts[0]);
+                                        lstTotalRight.add(number);
+                                      }
+                                      bool isAdd = true;
+                                      bool isDelete = false;
+                                      String temp = "";
+                                      for (int i = 0; i < rank.length; i++) {
+                                        var data =
+                                            rank[i].data() as Map<String, dynamic>;
+                                        List<String> parts =
+                                            data['totalRight'].split('/');
+                                        int number = int.parse(parts[0]);
+                                        if (data['userId'] ==
+                                                FirebaseAuth
+                                                    .instance.currentUser!.uid &&
+                                            number <= widget.result) {
+                                          temp = data['totalRight'];
+                                          // print(temp);
+                                          // print(FirebaseAuth
+                                          //     .instance.currentUser!.uid);
+                                          deleteDocumentByUserId(
+                                              FirebaseAuth
+                                                  .instance.currentUser!.uid,
+                                              temp);
+                                        } else if (data['userId'] ==
+                                                FirebaseAuth
+                                                    .instance.currentUser!.uid &&
+                                            number > widget.result) {
+                                          isAdd = false;
+                                        }
+                                      }
+                                      if (isAdd == true) {
+                                        lstTotalRight.sort();
+                                        rankOfCurrent = addNumberAndGetIndex(
+                                                lstTotalRight, widget.result) +
                                             1;
-
-                                    int res = widget.result;
-                                    int totalQuestion =
-                                        widget.totalVocab.length;
-                                    var totalR = '$res/$totalQuestion';
-                                    addRanking({
-                                      'userId': FirebaseAuth
-                                          .instance.currentUser!.uid,
-                                      'ranked': rankOfCurrent,
-                                      'totalRight': totalR,
-                                    });
+                                        lstTotalRight.sort();
+                                        lstTotalRight =
+                                            lstTotalRight.reversed.toList();
+                                        rankOfCurrent =
+                                            lstTotalRight.indexOf(widget.result) +
+                                                1;
+                            
+                                        int res = widget.result;
+                                        int totalQuestion =
+                                            widget.totalVocab.length;
+                                        var totalR = '$res/$totalQuestion';
+                                        addRanking({
+                                          'userId': FirebaseAuth
+                                              .instance.currentUser!.uid,
+                                          'ranked': rankOfCurrent,
+                                          'totalRight': totalR,
+                                        });
+                                      }
+                                      _processingCompleted = true;
+                                    }
+                            
+                                    return SizedBox();
                                   }
-                                  _processingCompleted = true;
                                 }
-
-                                return SizedBox();
-                              }
-                            }
-                          }),
-                    ]),
-              ),
-            );
-          }
-        },
+                              }),
+                        ]),
+                  ),
+                ),
+              );
+            }
+          },
+        ),
       ),
     );
   }
