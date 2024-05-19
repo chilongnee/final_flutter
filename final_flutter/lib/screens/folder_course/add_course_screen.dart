@@ -1,4 +1,8 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:csv/csv.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:final_flutter/widgets/multiselect_dialog.dart';
@@ -188,7 +192,8 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add Course'),
+        title: const Text('Thêm Học Phần'),
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.save, size: 28, color: Colors.black),
@@ -230,6 +235,25 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                         style: const TextStyle(fontSize: 12),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 30),
+                  GestureDetector(
+                    onTap: _importFromCsv,
+                    child: const Row(
+                      children: [
+                        Icon(Icons.file_upload_outlined,
+                            size: 23, color: Colors.black),
+                        SizedBox(width: 4),
+                        Text(
+                          'Thêm bằng file CSV',
+                          style: TextStyle(
+                            fontSize: 12.0,
+                            color: Colors.black,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 30),
                   Row(
@@ -388,5 +412,66 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
 
   void add(BuildContext context) {
     print(context);
+  }
+
+  void _importFromCsv() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['csv'],
+    );
+
+    if (result != null) {
+      File file = File(result.files.single.path!);
+      final input = file.openRead();
+      final fields = await input
+          .transform(utf8.decoder)
+          .transform(const CsvToListConverter())
+          .toList();
+
+      if (fields.isNotEmpty) {
+        print('CSV:');
+        for (var row in fields) {
+          print(row);
+        }
+
+        setState(() {
+          titleController.text = fields[0][0];
+
+          _vocabContainers.clear();
+
+          int termColumnIndex = 0;
+          int definitionColumnIndex = 1;
+          int typesStartIndex = 2;
+
+          for (int i = 1; i < fields.length; i++) {
+            TextEditingController termController =
+                TextEditingController(text: fields[i][termColumnIndex]);
+            TextEditingController definitionController =
+                TextEditingController(text: fields[i][definitionColumnIndex]);
+            ValueNotifier<List<String>> selectedTypes =
+                ValueNotifier<List<String>>(
+                    fields[i].sublist(typesStartIndex).cast<String>());
+
+            _vocabContainers.add(
+              Column(
+                children: [
+                  AddVocabContainer(
+                    termController: termController,
+                    definitionController: definitionController,
+                    selectedTypes: selectedTypes,
+                    showMultiSelect: () {
+                      _showMultiSelect(selectedTypes);
+                    },
+                  ),
+                  const SizedBox(height: 20),
+                ],
+              ),
+            );
+          }
+        });
+      }
+    } else {
+      _showAlert(context, 'Không thể chọn file.');
+    }
   }
 }
