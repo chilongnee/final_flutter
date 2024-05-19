@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
-        ),
+        ), 
         home: AuthWidget(), // Use AuthWidget instead of Login directly
         debugShowCheckedModeBanner: false,
       

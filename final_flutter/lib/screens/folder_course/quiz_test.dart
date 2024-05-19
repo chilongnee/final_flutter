@@ -42,6 +42,7 @@ class _QuizTestState extends State<QuizTest> {
   DocumentSnapshot? _currentVocabulary;
   List<String> _answers = [];
   bool eng_vi = false;
+  int? _selectedLanguage = 1;
 
   @override
   void initState() {
@@ -97,6 +98,12 @@ class _QuizTestState extends State<QuizTest> {
             ),
           ),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () => _showSettingBottomSheet(context),
+          ),
+        ],
       ),
       body: _buildQuizWidget(screenSize),
     );
@@ -120,16 +127,21 @@ class _QuizTestState extends State<QuizTest> {
             final String vocabularyMeaning = _currentVocabulary!['definition'];
             final List<dynamic> types = _currentVocabulary!['types'];
 
-            if (_answers.isEmpty) {
-              _answers =
-                  _generateAnswerChoices(vocabularies, vocabularyMeaning);
+            if(_answers.isEmpty){
+              if (eng_vi == true) {
+                _answers = _generateAnswerChoicesEn(vocabularies, vocabularyName);
+              }else{
+                _answers = _generateAnswerChoicesVi(vocabularies, vocabularyMeaning);
+
+              }
             }
-            if(eng_vi == true){
-              return _buildQuizLayout(
-                screenSize, vocabularyMeaning, vocabularyName, types, _answers);
+            if (eng_vi == true) {
+              return _buildQuizLayout(screenSize, vocabularyMeaning,
+                  vocabularyName, types, _answers);
             }
             return _buildQuizLayout(
                 screenSize, vocabularyName, vocabularyMeaning, types, _answers);
+
           } else {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               Navigator.pushReplacement(
@@ -365,6 +377,63 @@ class _QuizTestState extends State<QuizTest> {
       ),
     );
   }
+  void _showSettingBottomSheet(BuildContext context) async {
+    var screenSize = MediaQuery.of(context).size;
+    return showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text('Hỏi bằng tiếng Việt, trả lời bằng tiếng Anh',style: TextStyle(fontSize: 13)),
+                  ),
+                  Expanded(
+                    child: ToggleSwitch(
+                      minWidth: screenSize.width * 0.28,
+                      cornerRadius: 20.0,
+                      activeBgColors: [
+                        [Colors.green[800]!],
+                        [Colors.red[800]!]
+                      ],
+                      activeFgColor: Colors.white,
+                      inactiveBgColor: Colors.grey,
+                      inactiveFgColor: Colors.white,
+                      initialLabelIndex: _selectedLanguage,
+                      totalSwitches: 2,
+                      labels: ['ON', 'OFF'],
+                      radiusStyle: true,
+                      onToggle: (index)  {
+                        setState(() {
+
+                          if(index == 1){
+                            _answers = [];
+                            eng_vi = false;
+                            _selectedLanguage = 1;
+                          }
+                          else if(index == 0){
+                            _answers = [];
+                            eng_vi = true;
+                            _selectedLanguage = 0;
+                          }
+                        });
+                      },
+                    ),
+                  )
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
 
   Future<DocumentSnapshot> _fetchCourses() async {
     return FirebaseFirestore.instance
@@ -441,7 +510,23 @@ class _QuizTestState extends State<QuizTest> {
     return randomNumbers;
   }
 
-  List<String> _generateAnswerChoices(
+  List<String> _generateAnswerChoicesVi(
+      List<DocumentSnapshot> vocabularies, String correctAnswer) {
+    final randomIndicesVi = getTotalAnswer(vocabularies);
+
+    if (!randomIndicesVi.contains(_currentIndex - 1)) {
+      randomIndicesVi[Random().nextInt(3)] = _currentIndex - 1;
+    }
+
+    final answersVi = randomIndicesVi.map((index) {
+      return vocabularies[index]['definition'].toString();
+    }).toList();
+
+    answersVi.shuffle();
+
+    return answersVi;
+  }
+  List<String> _generateAnswerChoicesEn(
       List<DocumentSnapshot> vocabularies, String correctAnswer) {
     final randomIndices = getTotalAnswer(vocabularies);
 
@@ -450,7 +535,7 @@ class _QuizTestState extends State<QuizTest> {
     }
 
     final answers = randomIndices.map((index) {
-      return vocabularies[index]['definition'].toString();
+      return vocabularies[index]['term'].toString();
     }).toList();
 
     answers.shuffle();
@@ -470,9 +555,10 @@ class _QuizTestState extends State<QuizTest> {
       _isFalse2 = false;
       _isFalse3 = false;
       _isFalse4 = false;
-      _currentVocabulary = null; // Reset current vocabulary to fetch new one
-      _answers =
-          []; // Clear the answers list to generate new ones for the next question
+      _currentVocabulary = null; 
+      _answers = []; 
     });
   }
+
+  
 }

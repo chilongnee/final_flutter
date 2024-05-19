@@ -5,6 +5,7 @@ import 'package:final_flutter/screens/folder_course/sumarize_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 
 class TypeTest extends StatefulWidget {
   final String courseId;
@@ -31,7 +32,7 @@ class _TypeTestState extends State<TypeTest> {
   String _userAnswer = '';
   TextEditingController _textEditingController = TextEditingController();
   bool eng_vi = false;
-
+  int? _selectedLanguage = 1;
   @override
   void initState() {
     super.initState();
@@ -86,6 +87,12 @@ class _TypeTestState extends State<TypeTest> {
             ),
           ),
         ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.settings),
+            onPressed: () => _showSettingBottomSheet(context),
+          ),
+        ],
       ),
       body: _buildQuizWidget(screenSize),
     );
@@ -129,7 +136,7 @@ class _TypeTestState extends State<TypeTest> {
               );
             });
 
-            return const Center(child: Text('No vocabulary available'));
+            return Container();
           }
         }
       },
@@ -238,7 +245,61 @@ class _TypeTestState extends State<TypeTest> {
       ),
     );
   }
+void _showSettingBottomSheet(BuildContext context) async {
+    var screenSize = MediaQuery.of(context).size;
+    return showModalBottomSheet(
+      context: context,
+      builder: (BuildContext context) {
+        return Container(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: Text('Hỏi bằng tiếng Việt, trả lời bằng tiếng Anh',style: TextStyle(fontSize: 13)),
+                  ),
+                  Expanded(
+                    child: ToggleSwitch(
+                      minWidth: screenSize.width * 0.28,
+                      cornerRadius: 20.0,
+                      activeBgColors: [
+                        [Colors.green[800]!],
+                        [Colors.red[800]!]
+                      ],
+                      activeFgColor: Colors.white,
+                      inactiveBgColor: Colors.grey,
+                      inactiveFgColor: Colors.white,
+                      initialLabelIndex: _selectedLanguage,
+                      totalSwitches: 2,
+                      labels: ['ON', 'OFF'],
+                      radiusStyle: true,
+                      onToggle: (index)  {
+                        setState(() {
 
+                          if(index == 1){
+                            eng_vi = false;
+                            _selectedLanguage = 1;
+                          }
+                          else if(index == 0){
+                            eng_vi = true;
+                            _selectedLanguage = 0;
+                          }
+                        });
+                      },
+                    ),
+                  )
+                ],
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
   Future<DocumentSnapshot> _fetchCourses() async {
     return FirebaseFirestore.instance
         .collection('users')
