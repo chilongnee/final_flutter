@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:final_flutter/home.dart';
 import 'package:final_flutter/screens/folder_course/course_detail.dart';
 import 'package:final_flutter/screens/folder_course/memory_card.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_card_swiper/flutter_card_swiper.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
@@ -260,7 +261,8 @@ class _SummarizeTestScreenState extends State<SummarizeTest> {
                                   int totalQuestion = widget.totalVocab.length;
                                   var totalR = '$res/$totalQuestion';
                                   addRanking({
-                                    'userId': widget.userId,
+                                    'userId':
+                                        FirebaseAuth.instance.currentUser!.uid,
                                     'ranked': rankOfCurrent + 1,
                                     'totalRight': totalR,
                                   });
@@ -282,22 +284,25 @@ class _SummarizeTestScreenState extends State<SummarizeTest> {
                                     List<String> parts =
                                         data['totalRight'].split('/');
                                     int number = int.parse(parts[0]);
-                                    if (data['userId'] == widget.userId &&
+                                    if (data['userId'] ==
+                                            FirebaseAuth
+                                                .instance.currentUser!.uid &&
                                         number <= widget.result) {
                                       temp = data['totalRight'];
-                                      // lstTotalRight.remove(data['ranked']);
+                                      // print(temp);
+                                      // print(FirebaseAuth
+                                      //     .instance.currentUser!.uid);
                                       deleteDocumentByUserId(
-                                          widget.userId, temp);
+                                          FirebaseAuth
+                                              .instance.currentUser!.uid,
+                                          temp);
                                     } else if (data['userId'] ==
-                                            widget.userId &&
+                                            FirebaseAuth
+                                                .instance.currentUser!.uid &&
                                         number > widget.result) {
                                       isAdd = false;
                                     }
                                   }
-                                  // print(isAdd);
-                                  // if (isDelete == true) {
-                                  //   deleteDocumentByUserId(widget.userId, temp);
-                                  // }
                                   if (isAdd == true) {
                                     lstTotalRight.sort();
                                     rankOfCurrent = addNumberAndGetIndex(
@@ -315,7 +320,8 @@ class _SummarizeTestScreenState extends State<SummarizeTest> {
                                         widget.totalVocab.length;
                                     var totalR = '$res/$totalQuestion';
                                     addRanking({
-                                      'userId': widget.userId,
+                                      'userId': FirebaseAuth
+                                          .instance.currentUser!.uid,
                                       'ranked': rankOfCurrent,
                                       'totalRight': totalR,
                                     });
@@ -359,14 +365,15 @@ class _SummarizeTestScreenState extends State<SummarizeTest> {
   Future<void> deleteDocumentByUserId(String userId, String totalRight) async {
     QuerySnapshot querySnapshot = await FirebaseFirestore.instance
         .collection('users')
-        .doc(userId)
+        .doc(widget.userId)
         .collection('courses')
         .doc(widget.courseId)
         .collection('ranking')
         .where('totalRight', isEqualTo: totalRight)
+        .where('userId', isEqualTo: userId)
         .limit(1)
         .get();
-
+    print(querySnapshot.docs);
     for (QueryDocumentSnapshot documentSnapshot in querySnapshot.docs) {
       await documentSnapshot.reference.delete();
     }

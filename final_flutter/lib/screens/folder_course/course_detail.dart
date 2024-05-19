@@ -29,7 +29,7 @@ class CourseDetail extends StatefulWidget {
 class _CourseDetailState extends State<CourseDetail> {
   late Future<DocumentSnapshot> _courseFuture;
   late FlutterTts flutterTts = FlutterTts();
-  late Map<String, bool> _isClickedMap; // Track star status for each vocabulary
+  late Map<String, bool> _isClickedMap;
 
   @override
   void initState() {
@@ -194,7 +194,7 @@ class _CourseDetailState extends State<CourseDetail> {
     );
   }
 
-  void _handleBoxTap(BuildContext context, String title) {
+  void _handleBoxTap(BuildContext context, String title) async{
     // Thực hiện điều gì đó dựa vào title
     // Ví dụ: chuyển sang màn hình tương ứng với title
     switch (title) {
@@ -218,12 +218,22 @@ class _CourseDetailState extends State<CourseDetail> {
         );
         break;
       case 'Xếp hạng':
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => RankingScreen(
-                  userId: widget.userId, courseId: widget.courseId)),
-        );
+         bool hasRankingData = await _checkRankingData();
+        if (hasRankingData) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (context) => RankingScreen(
+                    userId: widget.userId, courseId: widget.courseId)),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              backgroundColor: Colors.red,
+              content: Text('Không có dữ liệu xếp hạng'),
+            ),
+          );
+        }
         break;
       default:
         // Xử lý mặc định nếu không có trường hợp nào khớp
@@ -690,5 +700,17 @@ class _CourseDetailState extends State<CourseDetail> {
         content: Text('Đã xảy ra lỗi khi cập nhật từ vựng'),
       ));
     }
+  }
+   Future<bool> _checkRankingData() async {
+    final rankingCollection = FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.userId)
+        .collection('courses')
+        .doc(widget.courseId)
+        .collection('ranking');
+
+    final docSnapshot = await rankingCollection.doc(widget.userId).get();
+
+    return docSnapshot.exists;
   }
 }

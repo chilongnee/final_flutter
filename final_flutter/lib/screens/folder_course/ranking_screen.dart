@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class RankingScreen extends StatefulWidget {
   final String courseId;
   final String userId;
 
-  const RankingScreen(
-      {required this.userId, required this.courseId, super.key});
+  const RankingScreen({required this.userId, required this.courseId, super.key});
 
   @override
   State<RankingScreen> createState() => _RankingScreenState();
@@ -14,14 +14,14 @@ class RankingScreen extends StatefulWidget {
 
 class _RankingScreenState extends State<RankingScreen> {
   late Future<DocumentSnapshot> _course;
-  late Stream<QuerySnapshot> _ranking;
+  late Future<List<Map<String, dynamic>>> _rankingListFuture;
+  User? user = FirebaseAuth.instance.currentUser;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     _course = _fetchCourses();
-    _ranking = _fetchRanking();
+    _rankingListFuture = _fetchAndSortRanking();
   }
 
   @override
@@ -31,8 +31,7 @@ class _RankingScreenState extends State<RankingScreen> {
       appBar: AppBar(
         title: FutureBuilder(
           future: _course,
-          builder:
-              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
+          builder: (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const CircularProgressIndicator();
             } else if (snapshot.hasError) {
@@ -57,30 +56,29 @@ class _RankingScreenState extends State<RankingScreen> {
                   fontWeight: FontWeight.bold),
             )),
       ),
-      body: StreamBuilder(
-          stream: _ranking,
-          builder:
-              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+      body: FutureBuilder(
+          future: _rankingListFuture,
+          builder: (BuildContext context, AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const CircularProgressIndicator();
             } else if (snapshot.hasError) {
               return const Text('Error');
+            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+              return const Text('No rankings available');
             } else {
-              final rank = snapshot.data!.docs
-                  .where((doc) => doc['userId'] == widget.userId)
-                  .toList();
-              var getRanking = rank[0].data() as Map<String, dynamic>;
-              var totalRight = getRanking['totalRight'];
-              var ranked = getRanking['ranked'];
-              return _buildRankingWidget(screenSize, totalRight, ranked);
+              final List<Map<String, dynamic>> rankingList = snapshot.data!;
+              final rank = rankingList.where((doc) => doc['userId'] == user!.uid).toList();
+              var getRanking = rank.isNotEmpty ? rank[0] : {};
+              var totalRight = getRanking['totalRight'] ?? '0/0';
+              var ranked = getRanking['ranked'] ?? '-';
+              return _buildRankingWidget(screenSize, totalRight, ranked, rankingList);
             }
           }),
-      //body: _buildRankingWidget(screenSize),
     );
   }
 
   Widget _buildRankingWidget(
-      Size screenSize, dynamic totalRight, dynamic ranked) {
+      Size screenSize, dynamic totalRight, dynamic ranked, List<Map<String, dynamic>> rankingList) {
     return SingleChildScrollView(
       child: Container(
         color: Colors.teal.shade200,
@@ -106,12 +104,18 @@ class _RankingScreenState extends State<RankingScreen> {
                   ],
                 ),
               ),
-              _buildListUser(screenSize),
-              _buildListUser(screenSize),
-              _buildListUser(screenSize),
-              _buildListUser(screenSize),
-              _buildListUser(screenSize),
-              _buildListUser(screenSize),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: 6,
+                itemBuilder: (context, index) {
+                  if (index < rankingList.length) {
+                    return _buildRankingItem(screenSize, rankingList[index], index + 1);
+                  } else {
+                    return _buildDefaultRankingItem(screenSize, index + 1);
+                  }
+                },
+              ),
               Container(
                 margin: EdgeInsets.only(top: 10),
                 width: screenSize.width,
@@ -168,23 +172,64 @@ class _RankingScreenState extends State<RankingScreen> {
         .get();
   }
 
-  Stream<QuerySnapshot> _fetchRanking() {
-    return FirebaseFirestore.instance
+  Future<List<Map<String, dynamic>>> _fetchAndSortRanking() async {
+    QuerySnapshot snapshot = await FirebaseFirestore.instance
         .collection('users')
         .doc(widget.userId)
         .collection('courses')
         .doc(widget.courseId)
         .collection('ranking')
-        .snapshots();
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      List<QueryDocumentSnapshot> rankingDocs = snapshot.docs;
+
+      rankingDocs.sort((a, b) {
+        List<String> partsA = a['totalRight'].split('/');
+        List<String> partsB = b['totalRight'].split('/');
+        int totalRightA = int.parse(partsA[0]);
+        int totalRightB = int.parse(partsB[0]);
+        return totalRightB.compareTo(totalRightA);
+      });
+
+      for (int i = 0; i < rankingDocs.length; i++) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(widget.userId)
+            .collection('courses')
+            .doc(widget.courseId)
+            .collection('ranking')
+            .doc(rankingDocs[i].id)
+            .update({'ranked': i + 1});
+      }
+
+      List<Future<Map<String, dynamic>>> rankingFutures = rankingDocs.map((doc) async {
+        String userId = doc['userId'];
+        int ranked = doc['ranked'];
+        String totalRight = doc['totalRight'];
+        DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userId)
+            .get();
+        return {
+          'userId': userId,
+          'ranked': ranked,
+          'totalRight': totalRight,
+          'userName': userSnapshot['userName'],
+        };
+      }).toList();
+
+      // Chờ tất cả các Future hoàn thành
+      List<Map<String, dynamic>> rankingList = await Future.wait(rankingFutures);
+      return rankingList;
+    } else {
+      return [];
+    }
   }
 
-  Widget _buildListUser(Size screenSize) {
+  Widget _buildRankingItem(Size screenSize, Map<String, dynamic> user, int rank) {
     return Container(
-      margin: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 8,
-      ),
+      margin: EdgeInsets.only(left: 16, right: 16, top: 8),
       padding: EdgeInsets.all(16),
       height: screenSize.height * 0.1,
       decoration: BoxDecoration(
@@ -196,7 +241,61 @@ class _RankingScreenState extends State<RankingScreen> {
           Expanded(
             flex: 1,
             child: Text(
-              '01',
+              rank.toString(),
+              style: TextStyle(
+                  color: Color.fromRGBO(51, 51, 153, 1),
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Image.asset(
+              'assets/avtUser.png',
+              width: screenSize.width * 0.3,
+              height: screenSize.height * 0.2,
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              user['userName'],
+              style: TextStyle(
+                  color: Color.fromRGBO(51, 51, 153, 1),
+                  fontSize: 20,
+                  fontWeight: FontWeight.w900),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              user['totalRight'],
+              style: TextStyle(
+                  color: Color.fromRGBO(51, 51, 153, 1),
+                  fontSize: 30,
+                  fontWeight: FontWeight.w900),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDefaultRankingItem(Size screenSize, int rank) {
+    return Container(
+      margin: EdgeInsets.only(left: 16, right: 16, top: 8),
+      padding: EdgeInsets.all(16),
+      height: screenSize.height * 0.1,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10.0),
+        color: Colors.white,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            flex: 1,
+            child: Text(
+              rank.toString(),
               style: TextStyle(
                   color: Color.fromRGBO(51, 51, 153, 1),
                   fontSize: 30,
@@ -224,7 +323,7 @@ class _RankingScreenState extends State<RankingScreen> {
           Expanded(
             flex: 2,
             child: Text(
-              '0000',
+              '0/0',
               style: TextStyle(
                   color: Color.fromRGBO(51, 51, 153, 1),
                   fontSize: 30,
